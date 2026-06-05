@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POS — Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:#0b0f19;
+      color:white;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      display:flex;
+    }
+
+    .sidebar{
+      width:260px;
+      background:#121826;
+      border-right:1px solid rgba(255,255,255,0.05);
+      position:fixed;
+      left:0;
+      top:0;
+      bottom:0;
+      display:flex;
+      flex-direction:column;
+      z-index:100;
+    }
+
+    .sidebar-logo{
+      padding:24px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+
+    .sidebar-logo .logo-box{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+
+    .sidebar-logo span{
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .nav-section{
+      padding:20px 20px 10px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:rgba(255,255,255,0.35);
+    }
+
+    .nav-item{
+      margin:4px 12px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      color:rgba(255,255,255,0.65);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition:.2s;
+      font-size:14px;
+      font-weight:500;
+    }
+
+    .nav-item:hover,
+    .nav-item.active{
+      background:rgba(124,58,237,0.18);
+      color:white;
+    }
+
+    .sidebar-bottom{
+      margin-top:auto;
+      padding:16px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+
+    .user-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:#1b2333;
+      padding:12px;
+      border-radius:14px;
+    }
+
+    .avatar{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+    }
+
+    .user-name{
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .user-role{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+
+    .main{
+      margin-left:260px;
+      width:100%;
+      padding:28px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:28px;
+      flex-wrap:wrap;
+      gap:16px;
+    }
+
+    .page-title{
+      font-size:28px;
+      font-weight:700;
+    }
+
+    .page-date{
+      color:rgba(255,255,255,0.55);
+      margin-top:5px;
+      font-size:14px;
+    }
+
+    .btn-pos{
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      border:none;
+      color:white;
+      padding:12px 20px;
+      border-radius:12px;
+      font-weight:600;
+      text-decoration:none;
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:18px;
+      margin-bottom:28px;
+    }
+
+    .stat-card{
+      background:#151d2d;
+      border:1px solid rgba(255,255,255,0.05);
+      border-radius:22px;
+      padding:22px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .stat-card::before{
+      content:'';
+      position:absolute;
+      width:100px;
+      height:100px;
+      border-radius:50%;
+      right:-30px;
+      top:-30px;
+      opacity:.08;
+    }
+
+    .purple::before{ background:#7c3aed; }
+    .blue::before{ background:#2563eb; }
+    .green::before{ background:#10b981; }
+    .orange::before{ background:#f59e0b; }
+
+    .stat-icon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+      margin-bottom:16px;
+    }
+
+    .purple .stat-icon{ background:rgba(124,58,237,0.15); color:#a78bfa; }
+    .blue .stat-icon{ background:rgba(37,99,235,0.15); color:#60a5fa; }
+    .green .stat-icon{ background:rgba(16,185,129,0.15); color:#34d399; }
+    .orange .stat-icon{ background:rgba(245,158,11,0.15); color:#fbbf24; }
+
+    .stat-value{ font-size:28px; font-weight:700; }
+    .stat-label{ margin-top:6px; color:rgba(255,255,255,0.5); font-size:14px; }
+
+    .card-box{
+      background:#151d2d;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,0.05);
+      overflow:hidden;
+      height:100%;
+    }
+
+    .card-header-custom{
+      padding:20px 24px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .card-header-custom h5{ margin:0; font-size:16px; font-weight:600; }
+
+    table{ width:100%; border-collapse:collapse; }
+    thead{ background:rgba(255,255,255,0.02); }
+    thead th{ padding:14px 18px; font-size:12px; text-transform:uppercase; color:rgba(255,255,255,0.4); }
+    tbody td{ padding:16px 18px; border-top:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.75); font-size:14px; }
+    tbody tr:hover td{ background:rgba(255,255,255,0.02); }
+
+    .badge-status{ padding:6px 12px; border-radius:999px; font-size:12px; font-weight:600; }
+    .badge-completed{ background:rgba(16,185,129,0.15); color:#34d399; }
+    .badge-pending{ background:rgba(245,158,11,0.15); color:#fbbf24; }
+    .badge-cancelled{ background:rgba(239,68,68,0.15); color:#f87171; }
+
+    .stock-item{ padding:18px 22px; border-top:1px solid rgba(255,255,255,0.05); }
+    .stock-top{ display:flex; justify-content:space-between; margin-bottom:10px; }
+    .stock-name{ font-weight:600; font-size:14px; }
+    .stock-count{ color:#f87171; font-size:13px; font-weight:600; }
+    .stock-bar{ width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden; }
+    .stock-bar-fill{ height:100%; background:linear-gradient(90deg,#ef4444,#f97316); border-radius:999px; }
+    .empty-state{ padding:30px; text-align:center; color:rgba(255,255,255,0.4); }
+
+    .error-toast{
+      position:fixed; top:20px; right:20px;
+      background:#ef4444; color:white;
+      padding:14px 24px; border-radius:12px;
+      font-weight:600; z-index:9999; display:none;
+    }
+
+    @media(max-width:991px){
+      .sidebar{ width:100%; height:auto; position:relative; }
+      .main{ margin-left:0; }
+      body{ flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="error-toast" id="errorToast"></div>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+  <div class="sidebar-logo">
+    <div class="logo-box"><i class="fas fa-cash-register"></i></div>
+    <span>POS System</span>
+  </div>
+
+  <div class="nav-section">Main Menu</div>
+
+  <a href="/dashboard/" class="nav-item active">
+    <i class="fas fa-chart-pie"></i> Dashboard
+  </a>
+
+  <a href="/pos/" class="nav-item">
+    <i class="fas fa-shopping-cart"></i> POS Screen
+  </a>
+
+  <div class="nav-section">Management</div>
+
+  <a href="/products/" class="nav-item">
+    <i class="fas fa-box"></i> Products
+  </a>
+
+  <a href="/categories/" class="nav-item">
+    <i class="fas fa-tags"></i> Categories
+  </a>
+
+  <a href="/customers/" class="nav-item">
+    <i class="fas fa-users"></i> Customers
+  </a>
+
+  <a href="/stock/" class="nav-item">
+    <i class="fas fa-warehouse"></i> Stock
+  </a>
+
+  <div class="nav-section">Admin</div>
+
+  <a href="/reports/" class="nav-item">
+    <i class="fas fa-chart-bar"></i> Reports
+  </a>
+
+  <a href="/users/" class="nav-item">
+    <i class="fas fa-user-cog"></i> Users
+  </a>
+
+  <div class="sidebar-bottom">
+    <div class="user-box">
+      <div class="avatar">{{ username|truncatechars:1 }}</div>
+      <div>
+        <div class="user-name">{{ username }}</div>
+        <div class="user-role">
+          {% if role == "admin" %}Administrator{% else %}Cashier{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <a href="/logout/" class="nav-item mt-3" style="color:#f87171;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-date" id="todayDate"></div>
+    </div>
+    <a href="/pos/" class="btn-pos">
+      <i class="fas fa-cash-register me-2"></i> Open POS
+    </a>
+  </div>
+
+  <!-- STATS -->
+
+  <div class="stats-grid">
+
+    <div class="stat-card purple">
+      <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+      <div class="stat-value" id="statSales">$0.00</div>
+      <div class="stat-label">Today's Sales</div>
+    </div>
+
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+      <div class="stat-value" id="statOrders">0</div>
+      <div class="stat-label">Today's Orders</div>
+    </div>
+
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fas fa-box"></i></div>
+      <div class="stat-value" id="statProducts">0</div>
+      <div class="stat-label">Total Products</div>
+    </div>
+
+    <div class="stat-card orange">
+      <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="stat-value" id="statLowStock">0</div>
+      <div class="stat-label">Low Stock Alert</div>
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+
+  <div class="row g-4">
+
+    <div class="col-lg-7">
+      <div class="card-box">
+        <div class="card-header-custom">
+          <h5><i class="fas fa-receipt me-2 text-primary"></i> Recent Orders</h5>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Cashier</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentOrdersBody">
+              <tr><td colspan="4" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card-box">
+        <div class="card-header-custom">
+          <h5><i class="fas fa-exclamation-triangle me-2 text-warning"></i> Low Stock Products</h5>
+        </div>
+        <div id="lowStockList">
+          <div class="empty-state">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DJANGO INJECTED DATA
+// ============================================================
+
+var API      = "{{ api_base_url }}/api";
+var TOKEN    = "{{ token|escapejs }}";
+var ROLE     = "{{ role|escapejs }}";
+var USERNAME = "{{ username|escapejs }}";
+
+function getCSRFToken() {
+  var cookies = document.cookie.split(";");
+  for (var i = 0; i < cookies.length; i++) {
+    var parts = cookies[i].trim().split("=");
+    if (parts[0] === "csrftoken") return parts[1];
+  }
+  return "";
+}
+
+var headers = {
+  "Authorization": "Token " + TOKEN,
+  "Content-Type":  "application/json",
+  "X-CSRFToken":   getCSRFToken()
+};
+
+// ============================================================
+// DATE
+// ============================================================
+
+var now = new Date();
+
+document.getElementById("todayDate").textContent =
+  now.toLocaleDateString("km-KH", {
+    weekday: "long",
+    year:    "numeric",
+    month:   "long",
+    day:     "numeric"
+  });
+
+// ============================================================
+// ERROR HELPER
+// ============================================================
+
+function showError(msg) {
+  var toast = document.getElementById("errorToast");
+  toast.textContent = msg;
+  toast.style.display = "block";
+  setTimeout(function() { toast.style.display = "none"; }, 4000);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function extractResults(data) {
+  if (data && Array.isArray(data.results)) return data.results;
+  if (Array.isArray(data)) return data;
+  return [];
+}
+
+function extractCount(data) {
+  if (data && typeof data.count === "number") return data.count;
+  if (Array.isArray(data)) return data.length;
+  return 0;
+}
+
+function getCashierName(order) {
+  if (order.cashier && typeof order.cashier === "object") {
+    return order.cashier.username ||
+           (order.cashier.first_name + ' ' + order.cashier.last_name).trim() ||
+           "—";
+  }
+  return order.cashierName || order.cashier || "—";
+}
+
+function getGrandTotal(order) {
+  return parseFloat(order.grand_total || order.grandTotal || 0);
+}
+
+function formatStatus(status) {
+  if (!status) return "—";
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+// ============================================================
+// LOAD DASHBOARD
+// ============================================================
+
+async function loadDashboard() {
+
+  var today = now.toISOString().split("T")[0];
+
+  try {
+
+    // --- Fetch all data in parallel ---
+    var reportRes = await fetch(API + "/reports/daily/?date=" + today, { headers: headers });
+
+    // ✅ KEY FIX: Use the SAME endpoint and SAME filter the Products page uses.
+    // ProductViewSet already has ?low_stock=true which does stock__lt=10
+    // This is EXACTLY what your model's is_low_stock property checks.
+    var lowStockRes = await fetch(API + "/products/?low_stock=true", { headers: headers });
+
+    // Also fetch total product count
+    var productsRes = await fetch(API + "/products/", { headers: headers });
+
+    var ordersRes = await fetch(API + "/orders/?ordering=-created_at", { headers: headers });
+
+    // --- Check auth ---
+    if (reportRes.status === 401 || lowStockRes.status === 401 ||
+        productsRes.status === 401 || ordersRes.status === 401) {
+      window.location.href = "/logout/";
+      return;
+    }
+
+    // --- Parse responses ---
+    var reportData = reportRes.ok ? await reportRes.json() : {};
+    var lowStockData = lowStockRes.ok ? await lowStockRes.json() : {};
+    var productsData = productsRes.ok ? await productsRes.json() : {};
+    var ordersData = ordersRes.ok ? await ordersRes.json() : {};
+
+    // ✅ DEBUG: Open browser console (F12) to see these logs
+    console.log("=== DASHBOARD DEBUG ===");
+    console.log("lowStockData:", JSON.stringify(lowStockData));
+    console.log("lowStock count:", extractCount(lowStockData));
+    console.log("lowStock results:", extractResults(lowStockData));
+
+    // --- STATS ---
+    document.getElementById("statSales").textContent =
+      "$" + parseFloat(reportData.totalSales || 0).toFixed(2);
+
+    document.getElementById("statOrders").textContent =
+      reportData.totalOrders || 0;
+
+    document.getElementById("statProducts").textContent =
+      extractCount(productsData);
+
+    // ✅ KEY FIX: Low stock count comes directly from the filtered API
+    var lowStockResults = extractResults(lowStockData);
+    document.getElementById("statLowStock").textContent = lowStockResults.length;
+
+    // --- RECENT ORDERS ---
+    var ordersResults = extractResults(ordersData);
+    var tbody = document.getElementById("recentOrdersBody");
+
+    if (!ordersResults.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No orders found</td></tr>';
+    } else {
+      var rows = "";
+      var show = ordersResults.slice(0, 8);
+      for (var i = 0; i < show.length; i++) {
+        var order = show[i];
+        var cashierName = getCashierName(order);
+        var total = getGrandTotal(order).toFixed(2);
+        var status = order.status || "pending";
+        var statusDisplay = formatStatus(status);
+
+        rows += "<tr>";
+        rows += "<td>#" + (order.order_number || order.id || "—") + "</td>";
+        rows += "<td>" + cashierName + "</td>";
+        rows += '<td style="color:#34d399;font-weight:600;">$' + total + "</td>";
+        rows += '<td><span class="badge-status badge-' + status + '">' + statusDisplay + "</span></td>";
+        rows += "</tr>";
+      }
+      tbody.innerHTML = rows;
+    }
+
+    // --- LOW STOCK LIST ---
+    var lowStockList = document.getElementById("lowStockList");
+
+    if (!lowStockResults.length) {
+      lowStockList.innerHTML = '<div class="empty-state">All products have enough stock</div>';
+    } else {
+      var items = "";
+      for (var j = 0; j < lowStockResults.length; j++) {
+        var product = lowStockResults[j];
+        var pName = product.productName || product.name || "Unknown";
+        var currentStock = parseInt(product.stock) || 0;
+        var width = Math.min((currentStock / 10) * 100, 100);
+        var barColor = currentStock <= 3
+          ? "linear-gradient(90deg,#ef4444,#ef4444)"
+          : "linear-gradient(90deg,#ef4444,#f97316)";
+
+        items += '<div class="stock-item">';
+        items += '<div class="stock-top">';
+        items += '<div class="stock-name">' + pName + "</div>";
+        items += '<div class="stock-count">' + currentStock + " left</div>";
+        items += "</div>";
+        items += '<div class="stock-bar">';
+        items += '<div class="stock-bar-fill" style="width:' + width + '%;background:' + barColor + '"></div>';
+        items += "</div>";
+        items += "</div>";
+      }
+      lowStockList.innerHTML = items;
+    }
+
+  } catch (error) {
+    console.error("Dashboard load error:", error);
+    showError("Failed to load dashboard data. Check your connection.");
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+loadDashboard();
+</script>
+
+</body>
+</html>

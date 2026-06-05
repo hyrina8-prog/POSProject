@@ -1,0 +1,527 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8"/>
+  <title>POS — Products</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:#0b0f19;
+      color:white;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      display:flex;
+    }
+
+    .sidebar{
+      width:260px;
+      background:#121826;
+      border-right:1px solid rgba(255,255,255,0.05);
+      position:fixed;
+      left:0;
+      top:0;
+      bottom:0;
+      display:flex;
+      flex-direction:column;
+      z-index:100;
+    }
+
+    .sidebar-logo{
+      padding:24px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+
+    .sidebar-logo .logo-box{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+
+    .sidebar-logo span{
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .nav-section{
+      padding:20px 20px 10px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:rgba(255,255,255,0.35);
+    }
+
+    .nav-item{
+      margin:4px 12px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      color:rgba(255,255,255,0.65);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition:.2s;
+      font-size:14px;
+      font-weight:500;
+    }
+
+    .nav-item:hover,
+    .nav-item.active{
+      background:rgba(124,58,237,0.18);
+      color:white;
+    }
+
+    .sidebar-bottom{
+      margin-top:auto;
+      padding:16px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+
+    .user-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:#1b2333;
+      padding:12px;
+      border-radius:14px;
+    }
+
+    .avatar{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+    }
+
+    .user-name{
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .user-role{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+    
+     .main{
+      margin-left:260px;
+      width:100%;
+      padding:28px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:28px;
+      flex-wrap:wrap;
+      gap:16px;
+    }
+    .page-title{
+      font-size:28px;
+      font-weight:700;
+    }
+
+    .page-date{
+      color:rgba(255,255,255,0.55);
+      margin-top:5px;
+      font-size:14px;
+    }
+    .btn-add { background:linear-gradient(135deg,#e94560,#c62a47); border:none; border-radius:10px; padding:9px 20px; color:white; font-size:14px; font-weight:600; cursor:pointer; }
+    .card-box { background:#1b2333; border-radius:15px; border:1px solid rgba(255,255,255,0.05); overflow:hidden; }
+    .card-box-header { padding:15px 20px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; gap:12px; align-items:center; }
+    .search-input { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 14px; color:white; font-size:13px; width:240px; }
+    .search-input::placeholder { color:rgba(255,255,255,0.3); }
+    .search-input:focus { outline:none; border-color:#e94560; }
+    table { width:100%; border-collapse:collapse; }
+    thead th { padding:12px 18px; font-size:11px; text-transform:uppercase; color:rgba(255,255,255,0.3); letter-spacing:0.5px; background:rgba(255,255,255,0.02); }
+    tbody td { padding:12px 18px; font-size:13px; color:rgba(255,255,255,0.7); border-top:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+    tbody tr:hover td { background:rgba(255,255,255,0.02); }
+    .action-btn { border:none; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer; margin-right:4px; }
+    .btn-edit   { background:rgba(67,97,238,0.2); color:#4361ee; }
+    .btn-delete { background:rgba(233,69,96,0.2); color:#e94560; }
+    .stock-badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+    .stock-ok  { background:rgba(46,196,182,0.15); color:#2ec4b6; }
+    .stock-low { background:rgba(247,183,49,0.15); color:#f7b731; }
+    .stock-out { background:rgba(233,69,96,0.15); color:#e94560; }
+    .prod-thumb { width:38px; height:38px; border-radius:8px; object-fit:cover; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; }
+    .modal-content { background:#1a1a2e; border:1px solid rgba(255,255,255,0.1); border-radius:15px; color:white; }
+    .modal-header,.modal-footer { border-color:rgba(255,255,255,0.08); }
+    .form-control,.form-select { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; }
+    .form-control:focus,.form-select:focus { background:rgba(255,255,255,0.12); border-color:#e94560; color:white; box-shadow:none; }
+    .form-control::placeholder { color:rgba(255,255,255,0.3); }
+    .form-select option { background:#1a1a2e; }
+    label { color:rgba(255,255,255,0.6); font-size:13px; }
+    .alert-box { display:none; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box"><i class="fas fa-cash-register"></i></div>
+    <span>POS System</span>
+  </div>
+  <div class="nav-section">Main Menu</div>
+  <a class="nav-item" href="{% url 'template_dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+  <a class="nav-item" href="{% url 'template_pos' %}"><i class="fas fa-shopping-cart"></i> POS Screen</a>
+  <div class="nav-section">Management</div>
+  <a class="nav-item active" href="{% url 'template_products' %}"><i class="fas fa-box"></i> Products</a>
+  <a class="nav-item" href="{% url 'template_categories' %}"><i class="fas fa-tags"></i> Categories</a>
+  <a class="nav-item" href="{% url 'template_customers' %}"><i class="fas fa-users"></i> Customers</a>
+  <a class="nav-item" href="{% url 'template_stock' %}"><i class="fas fa-warehouse"></i> Stock</a>
+  <div class="nav-section">Admin</div>
+  <a class="nav-item" href="{% url 'template_reports' %}"><i class="fas fa-chart-bar"></i> Reports</a>
+  <a class="nav-item" href="{% url 'template_users' %}"><i class="fas fa-user-cog"></i> Users</a>
+
+  <div class="sidebar-bottom">
+    <div class="user-box">
+      <div class="avatar">{{ username|truncatechars:1 }}</div>
+      <div>
+        <div class="user-name">{{ username }}</div>
+        <div class="user-role">
+          {% if role == "admin" %}Administrator{% else %}Cashier{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <a href="/logout/" class="nav-item mt-3" style="color:#f87171;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+     <div>
+      <div class="page-title">Products</div>
+      <div class="page-date" id="todayDate"></div>
+    </div>
+    <button class="btn-add" onclick="openAddModal()"><i class="fas fa-plus me-2"></i>Add Product</button>
+  </div>
+
+  <div class="card-box">
+    <div class="card-box-header">
+      <input class="search-input" id="searchInput" placeholder="🔍  Search product name..." oninput="filterTable()"/>
+      <select class="search-input" id="catFilter" onchange="filterTable()" style="width:160px">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Image</th><th>Product Name</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="productTable">
+        <tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal fade" id="productModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Add Product</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger alert-box" id="modalError"></div>
+        <input type="hidden" id="editId"/>
+        <div class="row g-3">
+          <div class="col-12"><label>Product Name *</label><input type="text" class="form-control" id="fName" placeholder="e.g. Coca Cola"/></div>
+          <div class="col-6"><label>Barcode</label><input type="text" class="form-control" id="fBarcode" placeholder="e.g. 885000123"/></div>
+          <div class="col-6"><label>Category</label><select class="form-select" id="fCategory"></select></div>
+          <div class="col-6"><label>Image</label><input type="file" class="form-control" id="fImage" accept="image/*"/></div>
+          <div class="col-6"><label>Price ($) *</label><input type="number" class="form-control" id="fPrice" placeholder="0.00" step="0.01" min="0"/></div>
+          <div class="col-6"><label>Stock Qty</label><input type="number" class="form-control" id="fStock" placeholder="0" min="0"/></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" onclick="saveProduct()"><i class="fas fa-save me-2"></i>Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SECURELY INJECT RAW DATA (This is what JavaScript will read) -->
+{{ products_data|json_script:"products-data" }}
+{{ categories_data|json_script:"categories-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* =========================
+   CONFIG & AUTH
+========================= */
+const API_BASE = '{{ api_base_url }}/api';
+const TOKEN = '{{ token }}';
+
+function getCSRFToken() {
+  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
+  return cookie ? cookie.split('=')[1] : '';
+}
+
+const AUTH_HEADERS = {
+  'Authorization': `Token ${TOKEN}`,
+  'X-CSRFToken': getCSRFToken()
+};
+
+let allProducts = [];
+let allCategories = [];
+
+/* =========================
+   HELPERS
+========================= */
+function showError(message) { alert(message); }
+
+function formatImage(path) {
+  if (!path) return '';
+  return path.startsWith('http') ? path : `${API_BASE.replace('/api', '')}${path}`;
+}
+
+function stockClass(stock) { return stock <= 0 ? 'stock-out' : stock <= 5 ? 'stock-low' : 'stock-ok'; }
+function stockLabel(stock) { return stock <= 0 ? 'Out' : stock <= 5 ? 'Low' : 'OK'; }
+
+async function apiRequest(url, options = {}) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: { ...AUTH_HEADERS, ...(options.headers || {}) }
+    });
+    if (response.status === 401) {
+      window.location.href = '{% url "template_login" %}';
+      return;
+    }
+    return response;
+  } catch (error) {
+    console.error(error);
+    showError('Server connection failed!');
+  }
+}
+
+/* =========================
+   LOAD DATA
+========================= */
+function loadData() {
+  try {
+    let rawProducts = JSON.parse(document.getElementById('products-data').textContent);
+    let rawCategories = JSON.parse(document.getElementById('categories-data').textContent);
+    
+    // Handle DRF Pagination just in case
+    allProducts = Array.isArray(rawProducts) ? rawProducts : (rawProducts.results || []);
+    allCategories = Array.isArray(rawCategories) ? rawCategories : (rawCategories.results || []);
+
+    loadCategoryOptions();
+    renderProducts(allProducts);
+    
+  } catch (error) {
+    console.error("Failed to load data:", error);
+    document.getElementById('productTable').innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align:center;padding:30px;color:red">
+          Error loading data. Check console (F12).
+        </td>
+      </tr>`;
+  }
+}
+
+/* =========================
+   CATEGORY OPTIONS
+========================= */
+function loadCategoryOptions() {
+  const filterSelect = document.getElementById('catFilter');
+  const formSelect = document.getElementById('fCategory');
+
+  filterSelect.innerHTML = '<option value="">All Categories</option>';
+  formSelect.innerHTML = '<option value="">Select Category</option>';
+
+  allCategories.forEach(cat => {
+    // Support both 'categoryName' and 'name' from serializer
+    const name = cat.categoryName || cat.name || 'Unknown';
+    filterSelect.innerHTML += `<option value="${cat.id}">${name}</option>`;
+    formSelect.innerHTML += `<option value="${cat.id}">${name}</option>`;
+  });
+}
+
+/* =========================
+   RENDER PRODUCTS
+========================= */
+function renderProducts(products) {
+  const tbody = document.getElementById('productTable');
+
+  if (!products || !products.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No Products Found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = products.map((product, index) => {
+    // Support Serializer Aliases
+    const pName = product.productName || product.name || 'No Name';
+    const pImage = product.productImage || product.image || null;
+    const pCategory = product.categoryName || (product.category && product.category.name) || '—';
+    const pCategoryID = product.categoryID || (product.category && product.category.id) || '';
+    
+    const imageUrl = formatImage(pImage);
+    
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td><div class="prod-thumb">${imageUrl ? `<img src="${imageUrl}" style="width:38px;height:38px;border-radius:8px;object-fit:cover">` : '📦'}</div></td>
+        <td style="font-weight:600;color:white">${pName}</td>
+        <td style="font-family:monospace;color:rgba(255,255,255,0.4)">${product.barcode || '—'}</td>
+        <td>${pCategory}</td>
+        <td style="color:#2ec4b6;font-weight:600">$${parseFloat(product.price).toFixed(2)}</td>
+        <td><span class="stock-badge ${stockClass(product.stock)}">${product.stock} (${stockLabel(product.stock)})</span></td>
+        <td>
+          <button class="action-btn btn-edit" onclick="openEditModal(${product.id})"><i class="fas fa-edit"></i></button>
+          <button class="action-btn btn-delete" onclick="deleteProduct(${product.id}, '${pName.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* =========================
+   SEARCH FILTER
+========================= */
+function filterTable() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const category = document.getElementById('catFilter').value;
+  const filtered = allProducts.filter(p => {
+    const pName = (p.productName || p.name || '').toLowerCase();
+    const pCatID = p.categoryID || (p.category && p.category.id) || '';
+    return pName.includes(keyword) && (!category || pCatID == category);
+  });
+  renderProducts(filtered);
+}
+
+/* =========================
+   MODAL LOGIC
+========================= */
+function resetModal() {
+  document.getElementById('editId').value = '';
+  document.getElementById('fName').value = '';
+  document.getElementById('fBarcode').value = '';
+  document.getElementById('fPrice').value = '';
+  document.getElementById('fStock').value = '';
+  document.getElementById('fImage').value = '';
+  document.getElementById('fCategory').selectedIndex = 0;
+  const errorBox = document.getElementById('modalError');
+  errorBox.style.display = 'none'; errorBox.textContent = '';
+}
+
+function openAddModal() {
+  resetModal();
+  document.getElementById('modalTitle').textContent = 'Add Product';
+  new bootstrap.Modal(document.getElementById('productModal')).show();
+}
+
+function openEditModal(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  
+  resetModal();
+  document.getElementById('modalTitle').textContent = 'Edit Product';
+  document.getElementById('editId').value = product.id;
+  document.getElementById('fName').value = product.productName || product.name;
+  document.getElementById('fBarcode').value = product.barcode || '';
+  document.getElementById('fPrice').value = product.price;
+  document.getElementById('fStock').value = product.stock;
+  document.getElementById('fCategory').value = product.categoryID || (product.category && product.category.id) || '';
+  
+  new bootstrap.Modal(document.getElementById('productModal')).show();
+}
+
+/* =========================
+   SAVE PRODUCT
+========================= */
+async function saveProduct() {
+  const errorBox = document.getElementById('modalError');
+  errorBox.style.display = 'none';
+
+  const id = document.getElementById('editId').value;
+  const productName = document.getElementById('fName').value.trim();
+  const barcode = document.getElementById('fBarcode').value.trim();
+  const price = document.getElementById('fPrice').value;
+  const stock = document.getElementById('fStock').value || 0;
+  const categoryID = document.getElementById('fCategory').value;
+  const image = document.getElementById('fImage').files[0];
+
+  if (!productName || !price) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = 'Product Name and Price are required!';
+    return;
+  }
+
+  const formData = new FormData();
+  
+  // ✅ MUST MATCH SERIALIZER ALIASES EXACTLY
+  formData.append('productName', productName); 
+  formData.append('price', price);
+  formData.append('stock', stock);
+  
+  if (barcode) formData.append('barcode', barcode);
+  if (categoryID) formData.append('category_id', categoryID); // Matches write_only field
+  if (image) formData.append('productImage', image); // Matches alias field
+
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `${API_BASE}/products/${id}/` : `${API_BASE}/products/`;
+
+  const response = await apiRequest(url, { method, body: formData });
+
+  if (response && response.ok) {
+    bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+    window.location.reload(); 
+  } else if (response) {
+    const errorData = await response.json();
+    errorBox.style.display = 'block';
+    errorBox.textContent = JSON.stringify(errorData);
+  }
+}
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+async function deleteProduct(id, name) {
+  if (!confirm(`Delete "${name}" ?`)) return;
+  const response = await apiRequest(`${API_BASE}/products/${id}/`, { method: 'DELETE' });
+  if (response && response.ok) {
+    window.location.reload(); 
+  } else {
+    showError('Delete failed!');
+  }
+}
+
+/* =========================
+   INIT
+========================= */
+loadData();
+
+</script>
+</body>
+</html>

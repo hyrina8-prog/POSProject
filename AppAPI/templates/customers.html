@@ -1,0 +1,463 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8"/>
+  <title>POS — Customers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+  *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:#0b0f19;
+      color:white;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      display:flex;
+    }
+
+    .sidebar{
+      width:260px;
+      background:#121826;
+      border-right:1px solid rgba(255,255,255,0.05);
+      position:fixed;
+      left:0;
+      top:0;
+      bottom:0;
+      display:flex;
+      flex-direction:column;
+      z-index:100;
+    }
+
+    .sidebar-logo{
+      padding:24px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+
+    .sidebar-logo .logo-box{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+
+    .sidebar-logo span{
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .nav-section{
+      padding:20px 20px 10px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:rgba(255,255,255,0.35);
+    }
+
+    .nav-item{
+      margin:4px 12px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      color:rgba(255,255,255,0.65);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition:.2s;
+      font-size:14px;
+      font-weight:500;
+    }
+
+    .nav-item:hover,
+    .nav-item.active{
+      background:rgba(124,58,237,0.18);
+      color:white;
+    }
+
+    .sidebar-bottom{
+      margin-top:auto;
+      padding:16px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+
+    .user-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:#1b2333;
+      padding:12px;
+      border-radius:14px;
+    }
+
+    .avatar{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+    }
+
+    .user-name{
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .user-role{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+    .main{
+      margin-left:260px;
+      width:100%;
+      padding:28px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:28px;
+      flex-wrap:wrap;
+      gap:16px;
+    }
+    .page-title{
+      font-size:28px;
+      font-weight:700;
+    }
+
+    .page-date{
+      color:rgba(255,255,255,0.55);
+      margin-top:5px;
+      font-size:14px;
+    }
+    .btn-add{background:linear-gradient(135deg,#e94560,#c62a47);border:none;border-radius:10px;padding:9px 20px;color:white;font-size:14px;font-weight:600;cursor:pointer}
+    .card-box{background:#1b2333;border-radius:15px;border:1px solid rgba(255,255,255,0.05);overflow:hidden}
+    .card-box-header{padding:15px 20px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;gap:12px;align-items:center}
+    .search-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px;color:white;font-size:13px;width:260px}
+    .search-input::placeholder{color:rgba(255,255,255,0.3)}
+    .search-input:focus{outline:none;border-color:#e94560}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:12px 18px;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,0.3);letter-spacing:0.5px;background:rgba(255,255,255,0.02)}
+    tbody td{padding:13px 18px;font-size:13px;color:rgba(255,255,255,0.7);border-top:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+    tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .action-btn{border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;margin-right:4px}
+    .btn-edit{background:rgba(67,97,238,0.2);color:#4361ee}
+    .btn-delete{background:rgba(233,69,96,0.2);color:#e94560}
+    .btn-view{background:rgba(46,196,182,0.2);color:#2ec4b6}
+    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#e94560,#0f3460);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white}
+    .modal-content{background:#1a1a2e;border:1px solid rgba(255,255,255,0.1);border-radius:15px;color:white}
+    .modal-header,.modal-footer{border-color:rgba(255,255,255,0.08)}
+    .form-control{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:8px}
+    .form-control:focus{background:rgba(255,255,255,0.12);border-color:#e94560;color:white;box-shadow:none}
+    .form-control::placeholder{color:rgba(255,255,255,0.3)}
+    label{color:rgba(255,255,255,0.6);font-size:13px}
+    .stat-mini{background:#1b2333;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:12px}
+    .stat-mini-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box"><i class="fas fa-cash-register"></i></div>
+    <span>POS System</span>
+  </div>
+  <div class="nav-section">Main Menu</div>
+  <a class="nav-item" href="{% url 'template_dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+  <a class="nav-item" href="{% url 'template_pos' %}"><i class="fas fa-shopping-cart"></i> POS Screen</a>
+  <div class="nav-section">Management</div>
+  <a class="nav-item" href="{% url 'template_products' %}"><i class="fas fa-box"></i> Products</a>
+  <a class="nav-item" href="{% url 'template_categories' %}"><i class="fas fa-tags"></i> Categories</a>
+  <a class="nav-item active" href="{% url 'template_customers' %}"><i class="fas fa-users"></i> Customers</a>
+  <a class="nav-item" href="{% url 'template_stock' %}"><i class="fas fa-warehouse"></i> Stock</a>
+  <div class="nav-section">Admin</div>
+  <a class="nav-item" href="{% url 'template_reports' %}"><i class="fas fa-chart-bar"></i> Reports</a>
+  <a class="nav-item" href="{% url 'template_users' %}"><i class="fas fa-user-cog"></i> Users</a>
+
+  <div class="sidebar-bottom">
+    <div class="user-box">
+      <div class="avatar">{{ username|truncatechars:1 }}</div>
+      <div>
+        <div class="user-name">{{ username }}</div>
+        <div class="user-role">
+          {% if role == "admin" %}Administrator{% else %}Cashier{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <a href="/logout/" class="nav-item mt-3" style="color:#f87171;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Customers</div>
+      <div class="page-date" id="todayDate"></div>
+    </div>
+    <button class="btn-add" onclick="openAddModal()"><i class="fas fa-plus me-2"></i>Add Customer</button>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="row g-3 mb-4" id="statsRow">
+    <div class="col-md-4">
+      <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:rgba(233,69,96,0.2);color:#e94560"><i class="fas fa-users"></i></div>
+        <div><div style="font-size:22px;font-weight:700;color:white" id="totalCust">0</div><div style="font-size:12px;color:rgba(255,255,255,0.4)">Total Customers</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-box">
+    <div class="card-box-header">
+      <input class="search-input" id="searchInput" placeholder="🔍  Search name or phone..." oninput="filterTable()"/>
+      <span style="font-size:13px;color:rgba(255,255,255,0.4)" id="countLabel"></span>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Customer</th><th>Phone</th><th>Address</th><th>Actions</th></tr></thead>
+      <tbody id="custTable"><tr><td colspan="5" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal fade" id="custModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Add Customer</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" id="modalError" style="display:none"></div>
+        <input type="hidden" id="editId"/>
+        <div class="mb-3">
+          <label>Customer Name *</label>
+          <input type="text" class="form-control mt-1" id="fName" placeholder="Full name"/>
+        </div>
+        <div class="mb-3">
+          <label>Phone</label>
+          <input type="text" class="form-control mt-1" id="fPhone" placeholder="012 345 678"/>
+        </div>
+        <div class="mb-3">
+          <label>Address</label>
+          <textarea class="form-control mt-1" id="fAddr" rows="2" placeholder="Address..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" onclick="saveCust()"><i class="fas fa-save me-2"></i>Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SECURELY INJECT DATA -->
+{{ customers_data|json_script:"customers-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* =========================
+   CONFIG & AUTH
+========================= */
+const API_BASE = '{{ api_base_url }}/api';
+const TOKEN = '{{ token }}';
+
+function getCSRFToken() {
+  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
+  return cookie ? cookie.split('=')[1] : '';
+}
+
+const AUTH_HEADERS = {
+  'Authorization': `Token ${TOKEN}`,
+  'X-CSRFToken': getCSRFToken(),
+  'Content-Type': 'application/json'
+};
+
+let allCusts = [];
+
+/* =========================
+   HELPERS
+========================= */
+async function apiRequest(url, options = {}) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: { ...AUTH_HEADERS, ...(options.headers || {}) }
+    });
+    if (response.status === 401) {
+      window.location.href = '{% url "template_login" %}';
+      return;
+    }
+    return response;
+  } catch (error) {
+    console.error(error);
+    alert('Server connection failed!');
+  }
+}
+
+/* =========================
+   LOAD DATA
+========================= */
+function loadCusts() {
+  try {
+    let rawCusts = JSON.parse(document.getElementById('customers-data').textContent);
+    allCusts = Array.isArray(rawCusts) ? rawCusts : (rawCusts.results || []);
+    document.getElementById('totalCust').textContent = allCusts.length;
+    renderTable(allCusts);
+  } catch (error) {
+    console.error("Failed to load customers:", error);
+    document.getElementById('custTable').innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;padding:30px;color:red">
+          Error loading customers. Check console (F12).
+        </td>
+      </tr>`;
+  }
+}
+
+/* =========================
+   RENDER TABLE
+========================= */
+function renderTable(data) {
+  document.getElementById('countLabel').textContent = `${data.length} customers`;
+  const tbody = document.getElementById('custTable');
+  
+  if (!data.length) { 
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No Customers Found</td></tr>'; 
+    return; 
+  }
+  
+  tbody.innerHTML = data.map((c, i) => {
+    const name = c.customerName || c.name || 'Unknown';
+    const phone = c.customerPhone || c.phone || '—';
+    const addr = c.customerAddr || c.address || '—';
+    
+    return `
+    <tr>
+      <td>${i+1}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="avatar">${name[0].toUpperCase()}</div>
+          <span style="color:white;font-weight:600">${name}</span>
+        </div>
+      </td>
+      <td>${phone}</td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${addr}</td>
+      <td>
+        <button class="action-btn btn-edit" onclick="openEdit(${c.id})"><i class="fas fa-edit"></i> Edit</button>
+        <button class="action-btn btn-delete" onclick="deleteCust(${c.id},'${name.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* =========================
+   SEARCH FILTER
+========================= */
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderTable(allCusts.filter(c => {
+    const name = (c.customerName || c.name || '').toLowerCase();
+    const phone = (c.customerPhone || c.phone || '');
+    return name.includes(q) || phone.includes(q);
+  }));
+}
+
+/* =========================
+   MODAL LOGIC
+========================= */
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'Add Customer';
+  document.getElementById('editId').value = '';
+  ['fName','fPhone','fAddr'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modalError').style.display = 'none';
+  new bootstrap.Modal(document.getElementById('custModal')).show();
+}
+
+function openEdit(id) {
+  const c = allCusts.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modalTitle').textContent = 'Edit Customer';
+  document.getElementById('editId').value  = c.id;
+  document.getElementById('fName').value   = c.customerName || c.name;
+  document.getElementById('fPhone').value  = c.customerPhone || c.phone || '';
+  document.getElementById('fAddr').value   = c.customerAddr || c.address || '';
+  document.getElementById('modalError').style.display = 'none';
+  new bootstrap.Modal(document.getElementById('custModal')).show();
+}
+
+/* =========================
+   SAVE CUSTOMER
+========================= */
+async function saveCust() {
+  const id     = document.getElementById('editId').value;
+  const errBox = document.getElementById('modalError');
+  
+  const payload = {
+    customerName:  document.getElementById('fName').value.trim(),
+    customerPhone: document.getElementById('fPhone').value.trim(),
+    customerAddr:  document.getElementById('fAddr').value.trim(),
+  };
+  
+  if (!payload.customerName) { 
+    errBox.textContent = 'Customer Name is required!'; 
+    errBox.style.display = 'block'; 
+    return; 
+  }
+  
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `${API_BASE}/customers/${id}/` : `${API_BASE}/customers/`;
+
+  const response = await apiRequest(url, {
+    method: method, 
+    body: JSON.stringify(payload)
+  });
+  
+  if (response && response.ok) { 
+    bootstrap.Modal.getInstance(document.getElementById('custModal')).hide(); 
+    window.location.reload(); 
+  } else if (response) { 
+    const d = await response.json(); 
+    errBox.textContent = JSON.stringify(d); 
+    errBox.style.display = 'block'; 
+  }
+}
+
+/* =========================
+   DELETE CUSTOMER
+========================= */
+async function deleteCust(id, name) {
+  if (!confirm(`Delete "${name}" ?`)) return;
+  const response = await apiRequest(`${API_BASE}/customers/${id}/`, { method: 'DELETE' });
+  if (response && response.ok) {
+    window.location.reload();
+  } else {
+    alert('Delete failed!');
+  }
+}
+
+/* =========================
+   INIT
+========================= */
+loadCusts();
+</script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8"/>
+  <title>POS — Stock Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:#0b0f19;
+      color:white;
+      font-family:'Segoe UI',sans-serif;
+      min-height:100vh;
+      display:flex;
+    }
+
+    .sidebar{
+      width:260px;
+      background:#121826;
+      border-right:1px solid rgba(255,255,255,0.05);
+      position:fixed;
+      left:0;
+      top:0;
+      bottom:0;
+      display:flex;
+      flex-direction:column;
+      z-index:100;
+    }
+
+    .sidebar-logo{
+      padding:24px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+
+    .sidebar-logo .logo-box{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+
+    .sidebar-logo span{
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .nav-section{
+      padding:20px 20px 10px;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:rgba(255,255,255,0.35);
+    }
+
+    .nav-item{
+      margin:4px 12px;
+      padding:12px 16px;
+      border-radius:12px;
+      text-decoration:none;
+      color:rgba(255,255,255,0.65);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition:.2s;
+      font-size:14px;
+      font-weight:500;
+    }
+
+    .nav-item:hover,
+    .nav-item.active{
+      background:rgba(124,58,237,0.18);
+      color:white;
+    }
+
+    .sidebar-bottom{
+      margin-top:auto;
+      padding:16px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+
+    .user-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      background:#1b2333;
+      padding:12px;
+      border-radius:14px;
+    }
+
+    .avatar{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#7c3aed,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+    }
+
+    .user-name{
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .user-role{
+      font-size:12px;
+      color:rgba(255,255,255,0.5);
+    }
+    
+    .main{
+      margin-left:260px;
+      width:100%;
+      padding:28px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:28px;
+      flex-wrap:wrap;
+      gap:16px;
+    }
+
+    .page-title{
+      font-size:28px;
+      font-weight:700;
+    }
+
+    .page-date{
+      color:rgba(255,255,255,0.55);
+      margin-top:5px;
+      font-size:14px;
+    }
+   
+    .btn-add{background:linear-gradient(135deg,#2ec4b6,#1a9e92);border:none;border-radius:10px;padding:9px 20px;color:white;font-size:14px;font-weight:600;cursor:pointer}
+    .btn-out{background:linear-gradient(135deg,#e94560,#c62a47);border:none;border-radius:10px;padding:9px 20px;color:white;font-size:14px;font-weight:600;cursor:pointer}
+    .card-box{background:#1b2333;border-radius:15px;border:1px solid rgba(255,255,255,0.05);overflow:hidden}
+    .card-box-header{padding:15px 20px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .search-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px;color:white;font-size:13px}
+    .search-input::placeholder{color:rgba(255,255,255,0.3)}
+    .search-input:focus{outline:none;border-color:#e94560}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:12px 18px;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,0.3);letter-spacing:0.5px;background:rgba(255,255,255,0.02)}
+    tbody td{padding:13px 18px;font-size:13px;color:rgba(255,255,255,0.7);border-top:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+    tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .badge-in{background:rgba(46,196,182,0.15);color:#2ec4b6;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+    .badge-out{background:rgba(233,69,96,0.15);color:#e94560;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+    .stat-card{background:#1b2333;border-radius:15px;padding:20px;border:1px solid rgba(255,255,255,0.05)}
+    .stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+    .modal-content{background:#1b2333;border:1px solid rgba(255,255,255,0.1);border-radius:15px;color:white}
+    .modal-header,.modal-footer{border-color:rgba(255,255,255,0.08)}
+    .form-control,.form-select{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:8px}
+    .form-control:focus,.form-select:focus{background:rgba(255,255,255,0.12);border-color:#e94560;color:white;box-shadow:none}
+    .form-control::placeholder{color:rgba(255,255,255,0.3)}
+    .form-select option{background:#1a1a2e}
+    label{color:rgba(255,255,255,0.6);font-size:13px}
+    .type-btn{border:2px solid rgba(255,255,255,0.1);background:transparent;border-radius:10px;padding:12px 20px;color:rgba(255,255,255,0.5);cursor:pointer;flex:1;font-size:14px;font-weight:600;transition:all 0.2s}
+    .type-btn.in.active{border-color:#2ec4b6;background:rgba(46,196,182,0.15);color:#2ec4b6}
+    .type-btn.out.active{border-color:#e94560;background:rgba(233,69,96,0.15);color:#e94560}
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box"><i class="fas fa-cash-register"></i></div>
+    <span>POS System</span>
+  </div>
+  <div class="nav-section">Main Menu</div>
+  <a class="nav-item" href="{% url 'template_dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+  <a class="nav-item" href="{% url 'template_pos' %}"><i class="fas fa-shopping-cart"></i> POS Screen</a>
+  <div class="nav-section">Management</div>
+  <a class="nav-item" href="{% url 'template_products' %}"><i class="fas fa-box"></i> Products</a>
+  <a class="nav-item" href="{% url 'template_categories' %}"><i class="fas fa-tags"></i> Categories</a>
+  <a class="nav-item" href="{% url 'template_customers' %}"><i class="fas fa-users"></i> Customers</a>
+  <a class="nav-item active" href="{% url 'template_stock' %}"><i class="fas fa-warehouse"></i> Stock</a>
+  <div class="nav-section">Admin</div>
+  <a class="nav-item" href="{% url 'template_reports' %}"><i class="fas fa-chart-bar"></i> Reports</a>
+  <a class="nav-item" href="{% url 'template_users' %}"><i class="fas fa-user-cog"></i> Users</a>
+  <div class="sidebar-bottom">
+    <div class="user-box">
+      <div class="avatar">{{ username|truncatechars:1 }}</div>
+      <div>
+        <div class="user-name">{{ username }}</div>
+        <div class="user-role">
+          {% if role == "admin" %}Administrator{% else %}Cashier{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <a href="/logout/" class="nav-item mt-3" style="color:#f87171;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Stock Management</div>
+      <div class="page-date" id="todayDate"></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-add" onclick="openModal('in')"><i class="fas fa-arrow-down me-2"></i>Stock In</button>
+      <button class="btn-out" onclick="openModal('out')"><i class="fas fa-arrow-up me-2"></i>Stock Out</button>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(46,196,182,0.2);color:#2ec4b6"><i class="fas fa-arrow-circle-down"></i></div>
+        <div style="font-size:24px;font-weight:700;color:white" id="totalIn">0</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4)">Total Stock In (Today)</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(233,69,96,0.2);color:#e94560"><i class="fas fa-arrow-circle-up"></i></div>
+        <div style="font-size:24px;font-weight:700;color:white" id="totalOut">0</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4)">Total Stock Out (Today)</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(247,183,49,0.2);color:#f7b731"><i class="fas fa-exclamation-triangle"></i></div>
+        <div style="font-size:24px;font-weight:700;color:white" id="lowStockCount">0</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4)">Low Stock Products (&lt;10)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOVEMENT TABLE -->
+  <div class="card-box">
+    <div class="card-box-header">
+      <input class="search-input" id="searchInput" placeholder="🔍  Search product..." oninput="filterTable()" style="width:220px"/>
+      <select class="search-input" id="typeFilter" onchange="filterTable()" style="width:140px">
+        <option value="">All Types</option>
+        <option value="in">Stock In</option>
+        <option value="out">Stock Out</option>
+      </select>
+      <span style="font-size:13px;color:rgba(255,255,255,0.4);margin-left:auto" id="countLabel"></span>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Product</th><th>Type</th><th>Quantity</th><th>Date & Time</th></tr></thead>
+      <tbody id="movTable"><tr><td colspan="5" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STOCK IN/OUT MODAL -->
+<div class="modal fade" id="stockModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Stock In</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" id="modalError" style="display:none"></div>
+        <div class="d-flex gap-2 mb-4">
+          <button class="type-btn in active" id="btnIn"  onclick="setType('in')"><i class="fas fa-arrow-down me-2"></i>Stock In</button>
+          <button class="type-btn out"        id="btnOut" onclick="setType('out')"><i class="fas fa-arrow-up me-2"></i>Stock Out</button>
+        </div>
+        <div class="mb-3">
+          <label>Product *</label>
+          <select class="form-select mt-1" id="fProduct">
+            <option value="">— Select Product —</option>
+          </select>
+        </div>
+        <div class="mb-1">
+          <label>Current Stock</label>
+          <div style="font-size:20px;font-weight:700;color:#2ec4b6;margin-top:4px" id="currentStock">—</div>
+        </div>
+        <div class="mb-3">
+          <label>Quantity *</label>
+          <input type="number" class="form-control mt-1" id="fQty" placeholder="Enter quantity" min="1"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="saveBtn" onclick="saveMovement()"><i class="fas fa-save me-2"></i>Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SECURELY INJECT DATA -->
+{{ stock_data|json_script:"stock-data" }}
+{{ products_data|json_script:"products-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* =========================
+   CONFIG & AUTH
+========================= */
+const API_BASE = '{{ api_base_url }}/api';
+const TOKEN = '{{ token|escapejs }}';
+
+function getCSRFToken() {
+  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
+  return cookie ? cookie.split('=')[1] : '';
+}
+
+const AUTH_HEADERS = {
+  'Authorization': `Token ${TOKEN}`,
+  'X-CSRFToken': getCSRFToken(),
+  'Content-Type': 'application/json'
+};
+
+let allMovements = [];
+let allProducts = [];
+let selectedType = 'in';
+
+/* =========================
+   HELPERS
+========================= */
+async function apiRequest(url, options = {}) {
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: { ...AUTH_HEADERS, ...(options.headers || {}) }
+    });
+    if (response.status === 401) {
+      window.location.href = '{% url "template_login" %}';
+      return;
+    }
+    return response;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+/* =========================
+   LOAD DATA
+========================= */
+async function loadData() {
+  try {
+    // --- Parse template-injected data for TABLE and DROPDOWN ---
+    let rawMovements = JSON.parse(document.getElementById('stock-data').textContent);
+    let rawProducts = JSON.parse(document.getElementById('products-data').textContent);
+
+    allMovements = Array.isArray(rawMovements) ? rawMovements : (rawMovements.results || []);
+    allProducts = Array.isArray(rawProducts) ? rawProducts : (rawProducts.results || []);
+
+    // --- ✅ FIX: Fetch stats from backend aggregation (not paginated list) ---
+    const [summaryRes, lowStockRes] = await Promise.all([
+      apiRequest(`${API_BASE}/stock-movements/today-summary/`),
+      apiRequest(`${API_BASE}/products/?low_stock=true`)
+    ]);
+
+    // ✅ FIX: Today totals from database aggregation — always accurate
+    if (summaryRes && summaryRes.ok) {
+      const summaryData = await summaryRes.json();
+      document.getElementById('totalIn').textContent = summaryData.total_in;
+      document.getElementById('totalOut').textContent = summaryData.total_out;
+    } else {
+      document.getElementById('totalIn').textContent = '—';
+      document.getElementById('totalOut').textContent = '—';
+    }
+
+    // ✅ FIX: Low stock count from the same API the Products page uses
+    if (lowStockRes && lowStockRes.ok) {
+      const lowStockData = await lowStockRes.json();
+      const lowStockResults = (lowStockData.results || lowStockData);
+      const lowStockCount = Array.isArray(lowStockResults) ? lowStockResults.length : 0;
+      document.getElementById('lowStockCount').textContent = lowStockCount;
+    } else {
+      document.getElementById('lowStockCount').textContent = '—';
+    }
+
+    // --- PRODUCT DROPDOWN ---
+    const select = document.getElementById('fProduct');
+    select.innerHTML = '<option value="">— Select Product —</option>';
+
+    allProducts.forEach(product => {
+      const pName = product.productName || product.name || 'Unknown';
+      select.innerHTML += `
+        <option value="${product.id}" data-stock="${product.stock}">
+          ${pName} (Stock: ${product.stock})
+        </option>
+      `;
+    });
+
+    select.onchange = function () {
+      const option = select.options[select.selectedIndex];
+      document.getElementById('currentStock').textContent = option.dataset.stock || '—';
+    };
+
+    renderTable(allMovements);
+
+  } catch (error) {
+    console.error("Failed to load stock data:", error);
+    document.getElementById('movTable').innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;color:#e94560;padding:30px">
+          Error loading stock data. Check console (F12).
+        </td>
+      </tr>`;
+  }
+}
+
+/* =========================
+   RENDER TABLE
+========================= */
+function renderTable(data) {
+  document.getElementById('countLabel').textContent = `${data.length} records`;
+  const tbody = document.getElementById('movTable');
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No stock movements found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map((m, index) => {
+    const type = (m.moveType || '').toLowerCase();
+    const pName = m.productName || (m.product && m.product.productName) || (m.product && m.product.name) || 'Unknown';
+
+    return `
+    <tr>
+      <td>${index + 1}</td>
+      <td style="font-weight:600;color:white">
+        <i class="fas fa-box me-2" style="color:rgba(255,255,255,0.3)"></i>
+        ${pName}
+      </td>
+      <td>
+        <span class="badge-${type}">
+          <i class="fas fa-arrow-${type === 'in' ? 'down' : 'up'} me-1"></i>
+          ${type === 'in' ? 'Stock In' : 'Stock Out'}
+        </span>
+      </td>
+      <td style="font-size:16px; font-weight:700; color:${type === 'in' ? '#2ec4b6' : '#e94560'}">
+        ${type === 'in' ? '+' : '-'}${m.quantity}
+      </td>
+      <td style="font-size:12px;color:rgba(255,255,255,0.4)">
+        ${m.moveDate ? new Date(m.moveDate).toLocaleString() : '—'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* =========================
+   SEARCH FILTER
+========================= */
+function filterTable() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const type = document.getElementById('typeFilter').value;
+
+  const filtered = allMovements.filter(m => {
+    const pName = (m.productName || (m.product && m.product.productName) || (m.product && m.product.name) || '').toLowerCase();
+    const mType = (m.moveType || '').toLowerCase();
+    const matchSearch = pName.includes(search);
+    const matchType = !type || mType === type;
+    return matchSearch && matchType;
+  });
+
+  renderTable(filtered);
+}
+
+/* =========================
+   MODAL LOGIC
+========================= */
+function setType(type) {
+  selectedType = type;
+  document.getElementById('btnIn').className = `type-btn in${type === 'in' ? ' active' : ''}`;
+  document.getElementById('btnOut').className = `type-btn out${type === 'out' ? ' active' : ''}`;
+  document.getElementById('modalTitle').textContent = type === 'in' ? 'Stock In' : 'Stock Out';
+  const btn = document.getElementById('saveBtn');
+  btn.style.background = type === 'in' ? '#2ec4b6' : '#e94560';
+}
+
+function openModal(type) {
+  setType(type);
+  document.getElementById('fProduct').selectedIndex = 0;
+  document.getElementById('fQty').value = '';
+  document.getElementById('currentStock').textContent = '—';
+  const errorBox = document.getElementById('modalError');
+  errorBox.style.display = 'none';
+  errorBox.textContent = '';
+  new bootstrap.Modal(document.getElementById('stockModal')).show();
+}
+
+/* =========================
+   SAVE MOVEMENT
+========================= */
+async function saveMovement() {
+  const errorBox = document.getElementById('modalError');
+  const productID = document.getElementById('fProduct').value;
+  const quantity = parseInt(document.getElementById('fQty').value);
+
+  if (!productID || !quantity || quantity < 1) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = 'Please select product and enter valid quantity';
+    return;
+  }
+
+  const payload = {
+    product_id: parseInt(productID),
+    movement_type: selectedType,
+    quantity: quantity
+  };
+
+  const response = await apiRequest(`${API_BASE}/stock-movements/`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  if (response && response.ok) {
+    bootstrap.Modal.getInstance(document.getElementById('stockModal')).hide();
+    window.location.reload();
+  } else if (response) {
+    const data = await response.json();
+    errorBox.style.display = 'block';
+    errorBox.textContent = data.error || JSON.stringify(data);
+  }
+}
+
+/* =========================
+   INIT
+========================= */
+
+// Display today's date
+var now = new Date();
+document.getElementById("todayDate").textContent =
+  now.toLocaleDateString("km-KH", {
+    weekday: "long",
+    year:    "numeric",
+    month:   "long",
+    day:     "numeric"
+  });
+
+loadData();
+</script>
+</body>
+</html>

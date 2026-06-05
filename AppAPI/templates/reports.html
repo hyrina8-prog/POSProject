@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POS — Reports</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#0b0f19;color:white;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex}
+    .sidebar{width:260px;background:#121826;border-right:1px solid rgba(255,255,255,0.05);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100}
+    .sidebar-logo{padding:24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .logo-box{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;font-size:18px}
+    .sidebar-logo span{font-size:18px;font-weight:700}
+    .nav-section{padding:20px 20px 10px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.35)}
+    .nav-item{margin:4px 12px;padding:12px 16px;border-radius:12px;text-decoration:none;color:rgba(255,255,255,0.65);display:flex;align-items:center;gap:12px;transition:.2s;font-size:14px;font-weight:500}
+    .nav-item:hover,.nav-item.active{background:rgba(124,58,237,0.18);color:white}
+    .sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,0.05)}
+    .user-box{display:flex;align-items:center;gap:12px;background:#1b2333;padding:12px;border-radius:14px}
+    .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .user-name{font-size:14px;font-weight:600}
+    .user-role{font-size:12px;color:rgba(255,255,255,0.5)}
+    .main{margin-left:260px;width:100%;padding:28px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:28px}
+    .page-title{font-size:28px;font-weight:700}
+    .page-date{margin-top:5px;color:rgba(255,255,255,0.55);font-size:14px}
+    .topbar-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn-custom{border:none;border-radius:12px;padding:12px 18px;font-weight:600;color:white;cursor:pointer}
+    .btn-primary-custom{background:linear-gradient(135deg,#7c3aed,#2563eb)}
+    .btn-secondary-custom{background:#1b2333;border:1px solid rgba(255,255,255,0.08)}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:28px}
+    .stat-card{background:#151d2d;border:1px solid rgba(255,255,255,0.05);border-radius:22px;padding:22px;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;width:100px;height:100px;border-radius:50%;top:-30px;right:-30px;opacity:.08}
+    .purple::before{background:#7c3aed} .blue::before{background:#2563eb} .green::before{background:#10b981} .orange::before{background:#f59e0b}
+    .stat-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+    .purple .stat-icon{background:rgba(124,58,237,0.15);color:#a78bfa} .blue .stat-icon{background:rgba(37,99,235,0.15);color:#60a5fa} .green .stat-icon{background:rgba(16,185,129,0.15);color:#34d399} .orange .stat-icon{background:rgba(245,158,11,0.15);color:#fbbf24}
+    .stat-value{font-size:28px;font-weight:700} .stat-label{margin-top:6px;color:rgba(255,255,255,0.5);font-size:14px}
+    .card-box{background:#151d2d;border-radius:22px;border:1px solid rgba(255,255,255,0.05);overflow:hidden;margin-bottom:24px}
+    .card-header-custom{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .card-header-custom h5{margin:0;font-size:16px;font-weight:600}
+    .summary-content{padding:24px} .summary-total{font-size:36px;font-weight:700;margin-bottom:10px} .summary-text{color:rgba(255,255,255,0.5);margin-bottom:24px}
+    .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}
+    .metric-box{background:#1b2333;border:1px solid rgba(255,255,255,0.05);border-radius:18px;padding:18px} .metric-box strong{font-size:24px;display:block;margin-bottom:6px} .metric-box span{color:rgba(255,255,255,0.5);font-size:14px}
+    table{width:100%;border-collapse:collapse} thead{background:rgba(255,255,255,0.02)} thead th{padding:14px 18px;font-size:12px;text-transform:uppercase;color:rgba(255,255,255,0.4)} tbody td{padding:16px 18px;border-top:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.75);font-size:14px} tbody tr:hover td{background:rgba(255,255,255,0.02)}
+    .badge-status{padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600} .badge-completed{background:rgba(16,185,129,0.15);color:#34d399} .badge-pending{background:rgba(245,158,11,0.15);color:#fbbf24} .badge-cancelled{background:rgba(239,68,68,0.15);color:#f87171}
+    .stock-item{padding:18px 24px;border-top:1px solid rgba(255,255,255,0.05)} .stock-name{font-size:15px;font-weight:600;margin-bottom:6px} .stock-left{color:#f87171;font-size:13px}
+    .empty-state{text-align:center;padding:28px;color:rgba(255,255,255,0.45)}
+    input[type="month"]{background:#1b2333;border:1px solid rgba(255,255,255,0.08);color:white;padding:10px 14px;border-radius:12px}
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box"><i class="fas fa-cash-register"></i></div>
+    <span>POS System</span>
+  </div>
+  <div class="nav-section">Main Menu</div>
+  <a href="{% url 'template_dashboard' %}" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+  <a href="{% url 'template_pos' %}" class="nav-item"><i class="fas fa-shopping-cart"></i> POS Screen</a>
+  <div class="nav-section">Management</div>
+  <a href="{% url 'template_products' %}" class="nav-item"><i class="fas fa-box"></i> Products</a>
+  <a href="{% url 'template_categories' %}" class="nav-item"><i class="fas fa-tags"></i> Categories</a>
+  <a href="{% url 'template_customers' %}" class="nav-item"><i class="fas fa-users"></i> Customers</a>
+  <a href="{% url 'template_stock' %}" class="nav-item"><i class="fas fa-warehouse"></i> Stock</a>
+  <div class="nav-section">Admin</div>
+  <a href="{% url 'template_reports' %}" class="nav-item active"><i class="fas fa-chart-bar"></i> Reports</a>
+  <a href="{% url 'template_users' %}" class="nav-item"><i class="fas fa-user-cog"></i> Users</a>
+  <div class="sidebar-bottom">
+    <div class="user-box">
+      <div class="avatar" id="sidebarAvatar">{{ username|first|upper }}</div>
+      <div>
+        <div class="user-name" id="sidebarName">{{ username }}</div>
+        <div class="user-role" id="sidebarRole">{{ role|title }}</div>
+      </div>
+    </div>
+    <a class="nav-item mt-3" href="{% url 'template_logout' %}" style="cursor:pointer;color:#f87171;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Reports</div>
+      <div class="page-date" id="todayDate"></div>
+    </div>
+    <div class="topbar-actions">
+      <a href="{% url 'template_pos' %}" class="btn-custom btn-primary-custom"><i class="fas fa-cash-register me-2"></i>Open POS</a>
+      <button class="btn-custom btn-secondary-custom" onclick="window.location.reload()"><i class="fas fa-sync-alt me-2"></i>Refresh</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card purple"><div class="stat-icon"><i class="fas fa-dollar-sign"></i></div><div class="stat-value" id="salesToday">$0.00</div><div class="stat-label">Today Sales</div></div>
+    <div class="stat-card blue"><div class="stat-icon"><i class="fas fa-calendar-alt"></i></div><div class="stat-value" id="salesMonth">$0.00</div><div class="stat-label">This Month Sales</div></div>
+    <div class="stat-card green"><div class="stat-icon"><i class="fas fa-receipt"></i></div><div class="stat-value" id="ordersToday">0</div><div class="stat-label">Orders Today</div></div>
+    <div class="stat-card orange"><div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div><div class="stat-value" id="lowStockCount">0</div><div class="stat-label">Low Stock Items</div></div>
+  </div>
+
+  <!-- SALES SUMMARY -->
+  <div class="card-box">
+    <div class="card-header-custom">
+      <h5><i class="fas fa-chart-line me-2 text-primary"></i> Sales Summary</h5>
+      <input type="month" id="monthFilter" onchange="loadReports()"/>
+    </div>
+    <div class="summary-content">
+      <div class="summary-total" id="totalRevenue">$0.00</div>
+      <div class="summary-text">Total revenue for selected month</div>
+      <div class="metric-grid">
+        <div class="metric-box"><strong id="avgOrderValue">$0.00</strong><span>Average Order Value</span></div>
+        <div class="metric-box"><strong id="ordersMonth">0</strong><span>Orders This Month</span></div>
+        <div class="metric-box"><strong id="uniqueCustomers">0</strong><span>Unique Customers</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE + LOW STOCK -->
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card-box">
+        <div class="card-header-custom"><h5><i class="fas fa-receipt me-2 text-primary"></i> Recent Orders</h5></div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Order</th><th>Cashier</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody id="recentOrdersBody"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-box">
+        <div class="card-header-custom"><h5><i class="fas fa-boxes me-2 text-warning"></i> Low Stock Alerts</h5></div>
+        <div id="lowStockList"><div class="empty-state">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   CONFIG & AUTH
+========================= */
+const API_BASE = '{{ api_base_url }}/api';
+const TOKEN = '{{ token|escapejs }}';
+
+function getCSRFToken() {
+  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
+  return cookie ? cookie.split('=')[1] : '';
+}
+
+const headers = {
+  'Authorization': `Token ${TOKEN}`,
+  'X-CSRFToken': getCSRFToken(),
+  'Content-Type': 'application/json'
+};
+
+const now = new Date();
+document.getElementById('todayDate').textContent = now.toLocaleDateString('km-KH',{ weekday:'long', year:'numeric', month:'long', day:'numeric' });
+const monthInput = document.getElementById('monthFilter');
+monthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+function extractResults(data) {
+  if (data && Array.isArray(data.results)) return data.results;
+  if (Array.isArray(data)) return data;
+  return [];
+}
+
+function extractCount(data) {
+  if (data && typeof data.count === "number") return data.count;
+  if (Array.isArray(data)) return data.length;
+  return 0;
+}
+
+async function loadReports(){
+  const today = now.toISOString().split('T')[0];
+  const selectedMonth = monthInput.value;
+  const year  = selectedMonth.split('-')[0];
+  const month = selectedMonth.split('-')[1];
+
+  try {
+    const [dailyRes, monthlyRes, lowStockRes, ordersRes] = await Promise.all([
+      fetch(`${API_BASE}/reports/daily/?date=${today}`, { headers }),
+      fetch(`${API_BASE}/reports/monthly/?year=${year}&month=${month}`, { headers }),
+      // ✅ KEY FIX: Use the SAME endpoint and SAME filter the Products page uses.
+      // ProductViewSet already has ?low_stock=true which does stock__lt=10
+      fetch(`${API_BASE}/products/?low_stock=true`, { headers }),
+      fetch(`${API_BASE}/orders/?ordering=-created_at`, { headers })
+    ]);
+
+    // Check auth
+    if (dailyRes.status === 401 || monthlyRes.status === 401 ||
+        lowStockRes.status === 401 || ordersRes.status === 401) {
+      window.location.href = '/logout/';
+      return;
+    }
+
+    const dailyData    = dailyRes.ok    ? await dailyRes.json()    : {};
+    const monthlyData  = monthlyRes.ok  ? await monthlyRes.json()  : {};
+    const lowStockRaw  = lowStockRes.ok ? await lowStockRes.json() : {};
+    const ordersRaw    = ordersRes.ok   ? await ordersRes.json()   : {};
+
+    // ✅ DEBUG: Open browser console (F12) to see these logs
+    console.log("=== REPORTS DEBUG ===");
+    console.log("lowStockRaw:", JSON.stringify(lowStockRaw));
+    console.log("lowStock count:", extractCount(lowStockRaw));
+    console.log("lowStock results:", extractResults(lowStockRaw));
+
+    // ✅ KEY FIX: Low stock comes from the products endpoint filtered by the ViewSet
+    const lowStockItems = extractResults(lowStockRaw);
+
+    /* STATS */
+    document.getElementById('salesToday').textContent = '$' + parseFloat(dailyData.totalSales || 0).toFixed(2);
+    document.getElementById('ordersToday').textContent = dailyData.totalOrders || 0;
+    document.getElementById('salesMonth').textContent = '$' + parseFloat(monthlyData.totalSales || 0).toFixed(2);
+    document.getElementById('lowStockCount').textContent = lowStockItems.length;
+
+    /* SUMMARY */
+    document.getElementById('totalRevenue').textContent = '$' + parseFloat(monthlyData.totalSales || 0).toFixed(2);
+    document.getElementById('ordersMonth').textContent = monthlyData.totalOrders || 0;
+    document.getElementById('avgOrderValue').textContent = '$' + (monthlyData.totalOrders > 0 ? monthlyData.totalSales / monthlyData.totalOrders : 0).toFixed(2);
+    document.getElementById('uniqueCustomers').textContent = monthlyData.uniqueCustomers || 0;
+
+    /* ORDERS */
+    const tbody = document.getElementById('recentOrdersBody');
+    const ordersList = extractResults(ordersRaw);
+
+    if (!ordersList.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No recent orders</td></tr>';
+    } else {
+      tbody.innerHTML = ordersList.slice(0,8).map(order => `
+        <tr>
+          <td>#${order.order_number || order.id}</td>
+          <td>${order.cashier && typeof order.cashier === 'object' ? (order.cashier.username || '—') : (order.cashier || '—')}</td>
+          <td style="color:#34d399;font-weight:600;">$${parseFloat(order.grand_total || 0).toFixed(2)}</td>
+          <td><span class="badge-status badge-${order.status}">${order.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    /* ✅ KEY FIX: LOW STOCK — from the products endpoint with ?low_stock=true */
+    const lowStockList = document.getElementById('lowStockList');
+    if (!lowStockItems.length) {
+      lowStockList.innerHTML = '<div class="empty-state">All products have enough stock</div>';
+    } else {
+      lowStockList.innerHTML = lowStockItems.map(product => `
+        <div class="stock-item">
+          <div class="stock-name">${product.productName || product.name || 'Unknown'}</div>
+          <div class="stock-left">${product.stock || 0} items left</div>
+        </div>
+      `).join('');
+    }
+
+  } catch(error) {
+    console.error("Failed to load reports:", error);
+  }
+}
+
+loadReports();
+</script>
+</body>
+</html>

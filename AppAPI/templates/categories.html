@@ -1,0 +1,364 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8"/>
+  <title>POS — Categories</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0b0f19; color:white; font-family:'Segoe UI',sans-serif; min-height:100vh; display:flex; }
+    
+    /* SIDEBAR */
+    .sidebar { width:260px; background:#121826; border-right:1px solid rgba(255,255,255,0.05); position:fixed; top:0; left:0; bottom:0; display:flex; flex-direction:column; z-index:100; }
+    .sidebar-logo { padding:24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .sidebar-logo .logo-box { width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#7c3aed,#2563eb); display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .sidebar-logo span { font-size:18px; font-weight:700; }
+    .nav-section { padding:20px 20px 10px; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.35); }
+    .nav-item { margin:4px 12px; padding:12px 16px; border-radius:12px; text-decoration:none; color:rgba(255,255,255,0.65); display:flex; align-items:center; gap:12px; transition:.2s; font-size:14px; font-weight:500; }
+    .nav-item:hover, .nav-item.active { background:rgba(124,58,237,0.18); color:white; }
+    .sidebar-bottom { margin-top:auto; padding:16px; border-top:1px solid rgba(255,255,255,0.05); }
+    .user-box { display:flex; align-items:center; gap:12px; background:#1b2333; padding:12px; border-radius:14px; }
+    .avatar { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#7c3aed,#2563eb); display:flex; align-items:center; justify-content:center; font-weight:700; }
+    .user-name { font-size:14px; font-weight:600; }
+    .user-role { font-size:12px; color:rgba(255,255,255,0.5); }
+
+    /* MAIN */
+    .main { margin-left:260px; width:100%; padding:28px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:16px; }
+    .page-title { font-size:28px; font-weight:700; }
+    .page-date { color:rgba(255,255,255,0.55); margin-top:5px; font-size:14px; }
+    .btn-add { border:none; background:linear-gradient(135deg,#e94560,#c62a47); color:white; border-radius:10px; padding:10px 18px; font-weight:600; cursor:pointer; }
+
+    /* CARD & TABLE */
+    .card-box { background:#1b2333; border-radius:15px; border:1px solid rgba(255,255,255,0.05); overflow:hidden; }
+    .card-box-header { padding:18px 20px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-between; align-items:center; }
+    .search-input { width:260px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 14px; color:white; font-size:13px; }
+    .search-input:focus { outline:none; border-color:#e94560; }
+    .search-input::placeholder { color:rgba(255,255,255,0.3); }
+    
+    table { width:100%; border-collapse:collapse; }
+    thead th { padding:14px 18px; font-size:12px; text-transform:uppercase; color:rgba(255,255,255,0.3); letter-spacing:0.5px; background:rgba(255,255,255,0.02); }
+    tbody td { padding:14px 18px; font-size:14px; color:rgba(255,255,255,0.75); border-top:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+    tbody tr:hover td { background:rgba(255,255,255,0.02); }
+    
+    .action-btn { border:none; border-radius:6px; padding:6px 10px; font-size:12px; cursor:pointer; margin-right:6px; }
+    .btn-edit { background:rgba(67,97,238,0.2); color:#4361ee; }
+    .btn-delete { background:rgba(233,69,96,0.2); color:#e94560; }
+    
+    .cat-thumb { width:40px; height:40px; border-radius:8px; background:rgba(255,255,255,0.06); overflow:hidden; display:flex; align-items:center; justify-content:center; }
+    .cat-thumb img { width:100%; height:100%; object-fit:cover; }
+
+    /* MODAL */
+    .modal-content { background:#1a1a2e; color:white; border-radius:15px; border:1px solid rgba(255,255,255,0.08); }
+    .modal-header, .modal-footer { border-color:rgba(255,255,255,0.08); }
+    .form-control { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.08); color:white; border-radius:8px; }
+    .form-control:focus { background:rgba(255,255,255,0.1); color:white; border-color:#e94560; box-shadow:none; }
+    .form-control::placeholder { color:rgba(255,255,255,0.3); }
+    label { font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:6px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-box"><i class="fas fa-cash-register"></i></div>
+    <span>POS System</span>
+  </div>
+  <div class="nav-section">Main Menu</div>
+  <a class="nav-item" href="{% url 'template_dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+  <a class="nav-item" href="{% url 'template_pos' %}"><i class="fas fa-shopping-cart"></i> POS Screen</a>
+  <div class="nav-section">Management</div>
+  <a class="nav-item" href="{% url 'template_products' %}"><i class="fas fa-box"></i> Products</a>
+  <a class="nav-item active" href="{% url 'template_categories' %}"><i class="fas fa-tags"></i> Categories</a>
+  <a class="nav-item" href="{% url 'template_customers' %}"><i class="fas fa-users"></i> Customers</a>
+  <a class="nav-item" href="{% url 'template_stock' %}"><i class="fas fa-warehouse"></i> Stock</a>
+  <div class="nav-section">Admin</div>
+  <a class="nav-item" href="{% url 'template_reports' %}"><i class="fas fa-chart-bar"></i> Reports</a>
+  <a class="nav-item" href="{% url 'template_users' %}"><i class="fas fa-user-cog"></i> Users</a>
+
+  <div class="sidebar-bottom">
+    <div class="user-box">
+      <div class="avatar">{{ username|truncatechars:1 }}</div>
+      <div>
+        <div class="user-name">{{ username }}</div>
+        <div class="user-role">
+          {% if role == "admin" %}Administrator{% else %}Cashier{% endif %}
+        </div>
+      </div>
+    </div>
+    <a href="{% url 'template_logout' %}" class="nav-item mt-3" style="color:#f87171;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Categories</div>
+      <div class="page-date" id="todayDate"></div>
+    </div>
+    <button class="btn-add" onclick="openAddModal()"><i class="fas fa-plus me-2"></i> Add Category</button>
+  </div>
+
+  <div class="card-box">
+    <div class="card-box-header">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search category name..." oninput="filterCategories()"/>
+      <span style="font-size:13px;color:rgba(255,255,255,0.4)" id="countLabel"></span>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Image</th>
+            <th>Category Name</th>
+            <th>Description</th>
+            <th>Products</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="categoriesTable">
+          <tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal fade" id="catModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Add Category</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" id="modalError" style="display:none"></div>
+        <input type="hidden" id="editId">
+        <div class="mb-3">
+          <label>Category Name *</label>
+          <input type="text" class="form-control" id="fName">
+        </div>
+        <div class="mb-3">
+          <label>Description</label>
+          <textarea class="form-control" rows="3" id="fDesc"></textarea>
+        </div>
+        <div class="mb-3">
+          <label>Category Image</label>
+          <input type="file" class="form-control" id="fImage">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" onclick="saveCategory()"><i class="fas fa-save me-2"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ SECURELY INJECT DATA -->
+{{ categories_data|json_script:"categories-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* =========================
+   CONFIG & AUTH
+========================= */
+const API_BASE = '{{ api_base_url }}/api';
+const TOKEN = '{{ token }}';
+
+function getCSRFToken() {
+  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
+  return cookie ? cookie.split('=')[1] : '';
+}
+
+const AUTH_HEADERS = {
+  'Authorization': `Token ${TOKEN}`,
+  'X-CSRFToken': getCSRFToken()
+};
+
+let allCategories = [];
+
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('km-KH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+/* =========================
+   LOAD DATA
+========================= */
+function loadCategories() {
+  try {
+    let rawCategories = JSON.parse(document.getElementById('categories-data').textContent);
+    allCategories = Array.isArray(rawCategories) ? rawCategories : (rawCategories.results || []);
+    renderCategories(allCategories);
+  } catch (error) {
+    console.error("Failed to load categories:", error);
+    document.getElementById('categoriesTable').innerHTML = `
+      <tr><td colspan="7" style="text-align:center;padding:30px;color:red;">
+        Error loading categories. Check console (F12).
+      </td></tr>`;
+  }
+}
+
+/* =========================
+   RENDER CATEGORIES (TABLE ROWS)
+========================= */
+function renderCategories(categories) {
+  document.getElementById('countLabel').innerHTML = `${categories.length} categories`;
+  const tbody = document.getElementById('categoriesTable');
+
+  if (!categories.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No Categories Found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = categories.map((cat, index) => {
+    const name = cat.categoryName || cat.name || 'Unknown';
+    const image = cat.categoryImage || cat.image || null;
+    const imgSrc = image ? (image.startsWith('http') ? image : `${API_BASE.replace('/api', '')}${image}`) : '';
+    const desc = cat.description || '—';
+    const prodCount = (cat.products_count !== undefined && cat.products_count !== null) ? cat.products_count : '0';
+    const isActive = cat.is_active;
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>
+          <div class="cat-thumb">
+            ${imgSrc ? `<img src="${imgSrc}">` : '🏷️'}
+          </div>
+        </td>
+        <td style="font-weight:600;color:white">${name}</td>
+        <td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,0.5)">${desc}</td>
+        <td>
+          <span style="background:rgba(46,196,182,0.15);color:#2ec4b6;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600">${prodCount}</span>
+        </td>
+        <td>
+          <span style="color:${isActive ? '#2ec4b6' : '#e94560'}; font-size:12px;">
+            <i class="fas fa-circle" style="font-size:8px; margin-right:4px;"></i>${isActive ? 'Active' : 'Inactive'}
+          </span>
+        </td>
+        <td>
+          <button class="action-btn btn-edit" onclick="openEdit(${cat.id})"><i class="fas fa-edit"></i></button>
+          <button class="action-btn btn-delete" onclick="deleteCategory(${cat.id}, '${name.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* =========================
+   SEARCH FILTER
+========================= */
+function filterCategories() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allCategories.filter(cat => (cat.categoryName || cat.name || '').toLowerCase().includes(q));
+  renderCategories(filtered);
+}
+
+/* =========================
+   MODAL LOGIC
+========================= */
+function openAddModal() {
+  document.getElementById('modalTitle').innerText = 'Add Category';
+  document.getElementById('editId').value = '';
+  document.getElementById('fName').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fImage').value = '';
+  document.getElementById('modalError').style.display = 'none';
+  new bootstrap.Modal(document.getElementById('catModal')).show();
+}
+
+function openEdit(id) {
+  const cat = allCategories.find(c => c.id === id);
+  if (!cat) return;
+
+  document.getElementById('modalTitle').innerText = 'Edit Category';
+  document.getElementById('editId').value = cat.id;
+  document.getElementById('fName').value = cat.categoryName || cat.name;
+  document.getElementById('fDesc').value = cat.description || '';
+  document.getElementById('fImage').value = '';
+  document.getElementById('modalError').style.display = 'none';
+  new bootstrap.Modal(document.getElementById('catModal')).show();
+}
+
+/* =========================
+   SAVE CATEGORY
+========================= */
+async function saveCategory() {
+  const id = document.getElementById('editId').value;
+  const categoryName = document.getElementById('fName').value.trim();
+  const description = document.getElementById('fDesc').value.trim();
+  const image = document.getElementById('fImage').files[0];
+  const errBox = document.getElementById('modalError');
+
+  if (!categoryName) {
+    errBox.style.display = 'block';
+    errBox.innerText = 'Category Name is required';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('categoryName', categoryName);
+  formData.append('description', description);
+  if (image) formData.append('categoryImage', image);
+
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `${API_BASE}/categories/${id}/` : `${API_BASE}/categories/`;
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: { 'Authorization': `Token ${TOKEN}`, 'X-CSRFToken': getCSRFToken() },
+      body: formData
+    });
+
+    if (response.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('catModal')).hide();
+      window.location.reload();
+    } else {
+      const data = await response.json();
+      errBox.style.display = 'block';
+      errBox.innerText = JSON.stringify(data);
+    }
+  } catch (error) {
+    errBox.style.display = 'block';
+    errBox.innerText = 'Server connection failed!';
+  }
+}
+
+/* =========================
+   DELETE CATEGORY
+========================= */
+async function deleteCategory(id, name) {
+  if (!confirm(`Delete "${name}" ?`)) return;
+  
+  try {
+    const response = await fetch(`${API_BASE}/categories/${id}/`, {
+      method: 'DELETE',
+      headers: AUTH_HEADERS
+    });
+    
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      alert('Delete failed!');
+    }
+  } catch (error) {
+    alert('Server connection failed!');
+  }
+}
+
+/* =========================
+   INIT
+========================= */
+loadCategories();
+</script>
+</body>
+</html>
