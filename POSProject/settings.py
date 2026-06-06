@@ -89,11 +89,15 @@ WSGI_APPLICATION = 'POSProject.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        # Fallback to local SQLite if DATABASE_URL environment variable isn't found
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",  # Local fallback
+        conn_max_age=600,
+        conn_health_checks=True,  # Recommended for production
     )
 }
+
+# For production, override the local API URL
+if not DEBUG and RENDER_EXTERNAL_HOSTNAME:
+    API_BASE_URL = f"https://{RENDER_EXTERNAL_HOSTNAME}"
 
 # ============================================================
 # AUTH
