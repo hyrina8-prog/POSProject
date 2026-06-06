@@ -206,10 +206,11 @@ if DEBUG:
 else:
     # In production: whitelist only your own domains
     CORS_ALLOWED_ORIGINS = [
-        # "https://yourpos.com",
-        # "https://admin.yourpos.com",
+        'https://posproject-my63.onrender.com'
     ]
     CORS_ALLOW_ALL_ORIGINS = False
+
+    
 
 
 # Base URL for internal API calls from template views
@@ -218,7 +219,7 @@ else:
 #API_BASE_URL = 'http://127.0.0.1:8000'
 
 # ⚠️ In production, change to:
-API_BASE_URL = 'https://posproject-my63.onrender.com/login/'
+API_BASE_URL = 'https://posproject-my63.onrender.com'
 
 
 
