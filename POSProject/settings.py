@@ -1,15 +1,20 @@
 import os
+
+import dj_database_url
+
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-local-safe-development-key')
-
+# 1. Debug auto-switches: True locally, False on Render
 DEBUG = 'RENDER' not in os.environ
 
+# 2. Secret Key: Uses Render's Environment Variable in production, falls back to local random key
+SECRET_KEY = os.environ.get('SECRET_KEY', 'local-dev-placeholder-never-use-this-in-production-123456789!@#$')
+
+# 3. Allowed Hosts
 ALLOWED_HOSTS = []
 
-# Render automatically gives your website an environment variable called RENDER_EXTERNAL_HOSTNAME
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -47,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',        # Must be before CommonMiddleware
     'django.middleware.common.CommonMiddleware',
@@ -82,24 +88,12 @@ WSGI_APPLICATION = 'POSProject.wsgi.application'
 # ============================================================
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Fallback to local SQLite if DATABASE_URL environment variable isn't found
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
+    )
 }
-
-# To use MySQL instead, replace with:
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'pos_db',
-#         'USER': 'root',
-#         'PASSWORD': 'your_password',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
-
 
 # ============================================================
 # AUTH
@@ -223,8 +217,12 @@ API_BASE_URL = 'https://posproject-my63.onrender.com'
 
 
 
+
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# This is where Django will collect static files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Enable WhiteNoise compression and caching
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
