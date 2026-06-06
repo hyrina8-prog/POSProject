@@ -62,7 +62,7 @@ class Customer(CoreModel):
 
     class Meta:
         db_table = 'customers'
-        ordering = ['name']
+        ordering = ['id']
 
     def __str__(self):
         return self.name
