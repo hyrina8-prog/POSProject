@@ -219,6 +219,10 @@ API_BASE_URL = 'https://posproject-my63.onrender.com'
 
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static', 
+]
 # This is where Django will collect static files for production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Enable WhiteNoise compression and caching
