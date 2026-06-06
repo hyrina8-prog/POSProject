@@ -198,9 +198,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 
-# ============================================================
-# CORS
-# ============================================================
+
 
 # ✅ FIXED — Don't allow ALL origins blindly, even in dev
 if DEBUG:
@@ -214,22 +212,15 @@ else:
     CORS_ALLOW_ALL_ORIGINS = False
 
 
-# ============================================================
-# API HELPER  ✅ NEW SECTION
-# ============================================================
-
 # Base URL for internal API calls from template views
 # In dev, Django serves both templates and API on the same port
 # In production, change this to your actual domain
-API_BASE_URL = 'http://127.0.0.1:8000'
+#API_BASE_URL = 'http://127.0.0.1:8000'
 
 # ⚠️ In production, change to:
-# API_BASE_URL = 'https://yourpos.com'
+API_BASE_URL = 'https://posproject-my63.onrender.com/login/'
 
 
-# ============================================================
-# MEDIA & STATIC
-# ============================================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -238,9 +229,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# ============================================================
-# INTERNATIONALIZATION
-# ============================================================
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Phnom_Penh'
@@ -249,10 +237,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# ============================================================
-# JAZZMIN ADMIN THEME
-# ============================================================
 
 JAZZMIN_SETTINGS = {
     'site_title': 'POS Admin',
