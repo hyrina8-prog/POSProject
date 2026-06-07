@@ -6,21 +6,31 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 1. Debug auto-switches: True locally, False on Render
 DEBUG = 'RENDER' not in os.environ
 
-# 2. Secret Key: Uses Render's Environment Variable in production, falls back to local random key
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'local-dev-placeholder-never-use-this-in-production-123456789!@#$')
 
-# 3. Allowed Hosts
+
 ALLOWED_HOSTS = []
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+    CORS_ALLOWED_ORIGINS = [
+        f"https://{RENDER_EXTERNAL_HOSTNAME}",
+    ]
+    
+
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{RENDER_EXTERNAL_HOSTNAME}",
+    ]
 else:
     ALLOWED_HOSTS.append('127.0.0.1')
     ALLOWED_HOSTS.append('localhost')
+    CORS_ALLOW_ALL_ORIGINS = True
 
 
 
@@ -116,6 +126,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Tell Django it's secure if the proxy header says it is
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Also a good idea to secure your CSRF cookies in production!
+CSRF_COOKIE_SECURE = not DEBUG
 
 # ============================================================
 # SESSION SECURITY  ✅ NEW SECTION
@@ -223,14 +238,23 @@ API_BASE_URL = 'https://posproject-my63.onrender.com'
 
 
 STATIC_URL = '/static/'
-
 STATICFILES_DIRS = [
     BASE_DIR / 'static', 
 ]
 # This is where Django will collect static files for production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Enable WhiteNoise compression and caching
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
