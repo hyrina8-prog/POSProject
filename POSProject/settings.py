@@ -1,16 +1,12 @@
 import os
-
 import dj_database_url
-
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = 'RENDER' not in os.environ
 
-
 SECRET_KEY = os.environ.get('SECRET_KEY', 'local-dev-placeholder-never-use-this-in-production-123456789!@#$')
-
 
 ALLOWED_HOSTS = []
 
@@ -18,12 +14,9 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
     CORS_ALLOWED_ORIGINS = [
         f"https://{RENDER_EXTERNAL_HOSTNAME}",
     ]
-    
-
     CSRF_TRUSTED_ORIGINS = [
         f"https://{RENDER_EXTERNAL_HOSTNAME}",
     ]
@@ -33,13 +26,12 @@ else:
     CORS_ALLOW_ALL_ORIGINS = True
 
 
-
 # ============================================================
 # INSTALLED APPS
 # ============================================================
 
 INSTALLED_APPS = [
-    # Jazzmin — beautiful admin UI (install: pip install django-jazzmin)
+    # Jazzmin — beautiful admin UI
     'jazzmin',
 
     # Django core
@@ -105,9 +97,6 @@ DATABASES = {
     )
 }
 
-# For production, override the local API URL
-if not DEBUG and RENDER_EXTERNAL_HOSTNAME:
-    API_BASE_URL = f"https://{RENDER_EXTERNAL_HOSTNAME}"
 
 # ============================================================
 # AUTH
@@ -115,8 +104,6 @@ if not DEBUG and RENDER_EXTERNAL_HOSTNAME:
 
 AUTH_USER_MODEL = 'AppAPI.User'
 
-# ✅ NEW — Tells Django where the login page is
-# Used by our @login_required_template decorator and Django's built-in auth
 LOGIN_URL = '/login/'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -129,27 +116,18 @@ AUTH_PASSWORD_VALIDATORS = [
 # Tell Django it's secure if the proxy header says it is
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Also a good idea to secure your CSRF cookies in production!
+# Secure CSRF cookies in production
 CSRF_COOKIE_SECURE = not DEBUG
 
+
 # ============================================================
-# SESSION SECURITY  ✅ NEW SECTION
+# SESSION SECURITY
 # ============================================================
 
-# How long the session lives (default is 1,209,600 = 2 weeks)
-# Set to 8 hours for a POS system — cashiers shouldn't stay logged in forever
 SESSION_COOKIE_AGE = 8 * 60 * 60  # 28,800 seconds = 8 hours
-
-# Expire session when browser closes (for POS kiosk safety)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-# Prevent JavaScript from reading the session cookie (XSS protection)
 SESSION_COOKIE_HTTPONLY = True
-
-# Only send session cookie over HTTPS in production
 SESSION_COOKIE_SECURE = not DEBUG  # True in production, False during dev
-
-# Don't send session cookie in cross-site requests (CSRF protection)
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 
@@ -211,9 +189,10 @@ SPECTACULAR_SETTINGS = {
 }
 
 
+# ============================================================
+# CORS
+# ============================================================
 
-
-# ✅ FIXED — Don't allow ALL origins blindly, even in dev
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
@@ -223,27 +202,17 @@ else:
     ]
     CORS_ALLOW_ALL_ORIGINS = False
 
-    
 
-
-# Base URL for internal API calls from template views
-# In dev, Django serves both templates and API on the same port
-# In production, change this to your actual domain
-#API_BASE_URL = 'http://127.0.0.1:8000'
-
-# ⚠️ In production, change to:
-API_BASE_URL = 'https://posproject-my63.onrender.com'
-
-
-
+# ============================================================
+# STATIC & MEDIA
+# ============================================================
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static', 
+    BASE_DIR / 'static',
 ]
-# This is where Django will collect static files for production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# Enable WhiteNoise compression and caching
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -253,13 +222,13 @@ STORAGES = {
     },
 }
 
-
-
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
+# ============================================================
+# MISC
+# ============================================================
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Phnom_Penh'
@@ -267,7 +236,6 @@ USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 JAZZMIN_SETTINGS = {
     'site_title': 'POS Admin',
@@ -294,3 +262,17 @@ JAZZMIN_SETTINGS = {
 }
 
 DEFAULT_TAX_RATE = 5.0
+
+
+# ============================================================
+# API BASE URL (THE FIX)
+# ============================================================
+
+# Base URL for internal API calls from template views
+if 'RENDER' in os.environ:
+    # On Render, talk directly to the internal container port.
+    # This bypasses the public internet, avoiding deadlocks, latency, and SSL issues!
+    API_BASE_URL = f"http://127.0.0.1:{os.environ.get('PORT', 10000)}"
+else:
+    # Local development
+    API_BASE_URL = 'http://127.0.0.1:8000'
