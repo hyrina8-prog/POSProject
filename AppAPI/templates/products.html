@@ -172,6 +172,22 @@
     .form-select option { background:#1a1a2e; }
     label { color:rgba(255,255,255,0.6); font-size:13px; }
     .alert-box { display:none; }
+
+    /* ✅ Toggle switch for is_active */
+    .toggle-switch { position:relative; display:inline-block; width:44px; height:24px; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:rgba(255,255,255,0.15); border-radius:24px; transition:.3s; }
+    .toggle-slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+    .toggle-switch input:checked + .toggle-slider { background:#2ec4b6; }
+    .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
+    .toggle-label { display:flex; align-items:center; gap:10px; }
+    .toggle-text { font-size:13px; color:rgba(255,255,255,0.6); }
+    .toggle-text.active-text { color:#2ec4b6; font-weight:600; }
+    .toggle-text.inactive-text { color:#e94560; font-weight:600; }
+
+    /* Status badges in table */
+    .status-active { color:#2ec4b6; }
+    .status-inactive { color:#e94560; }
   </style>
 </head>
 <body>
@@ -228,13 +244,19 @@
       <select class="search-input" id="catFilter" onchange="filterTable()" style="width:160px">
         <option value="">All Categories</option>
       </select>
+      <!-- ✅ Status filter -->
+      <select class="search-input" id="statusFilter" onchange="filterTable()" style="width:140px">
+        <option value="">All Status</option>
+        <option value="active">Active Only</option>
+        <option value="inactive">Inactive Only</option>
+      </select>
     </div>
     <table>
       <thead>
-        <tr><th>#</th><th>Image</th><th>Product Name</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+        <tr><th>#</th><th>Image</th><th>Product Name</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
       </thead>
       <tbody id="productTable">
-        <tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">Loading...</td></tr>
+        <tr><td colspan="9" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -258,6 +280,17 @@
           <div class="col-6"><label>Image</label><input type="file" class="form-control" id="fImage" accept="image/*"/></div>
           <div class="col-6"><label>Price ($) *</label><input type="number" class="form-control" id="fPrice" placeholder="0.00" step="0.01" min="0"/></div>
           <div class="col-6"><label>Stock Qty</label><input type="number" class="form-control" id="fStock" placeholder="0" min="0"/></div>
+          <!-- ✅ IS_ACTIVE TOGGLE -->
+          <div class="col-6">
+            <label>Active Status</label>
+            <div class="toggle-label" style="margin-top:6px">
+              <label class="toggle-switch">
+                <input type="checkbox" id="fIsActive" checked/>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-text" id="isActiveText">Active</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -268,7 +301,7 @@
   </div>
 </div>
 
-<!-- ✅ SECURELY INJECT RAW DATA (This is what JavaScript will read) -->
+<!-- ✅ SECURELY INJECT RAW DATA -->
 {{ products_data|json_script:"products-data" }}
 {{ categories_data|json_script:"categories-data" }}
 
@@ -279,7 +312,7 @@
    CONFIG & AUTH
 ========================= */
 const API_BASE = '{{ api_base_url }}/api';
-const TOKEN = '{{ token }}';
+const TOKEN = '{{ token|escapejs }}';
 
 function getCSRFToken() {
   const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken'));
@@ -332,7 +365,6 @@ function loadData() {
     let rawProducts = JSON.parse(document.getElementById('products-data').textContent);
     let rawCategories = JSON.parse(document.getElementById('categories-data').textContent);
     
-    // Handle DRF Pagination just in case
     allProducts = Array.isArray(rawProducts) ? rawProducts : (rawProducts.results || []);
     allCategories = Array.isArray(rawCategories) ? rawCategories : (rawCategories.results || []);
 
@@ -343,7 +375,7 @@ function loadData() {
     console.error("Failed to load data:", error);
     document.getElementById('productTable').innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center;padding:30px;color:red">
+        <td colspan="9" style="text-align:center;padding:30px;color:red">
           Error loading data. Check console (F12).
         </td>
       </tr>`;
@@ -361,7 +393,6 @@ function loadCategoryOptions() {
   formSelect.innerHTML = '<option value="">Select Category</option>';
 
   allCategories.forEach(cat => {
-    // Support both 'categoryName' and 'name' from serializer
     const name = cat.categoryName || cat.name || 'Unknown';
     filterSelect.innerHTML += `<option value="${cat.id}">${name}</option>`;
     formSelect.innerHTML += `<option value="${cat.id}">${name}</option>`;
@@ -375,21 +406,25 @@ function renderProducts(products) {
   const tbody = document.getElementById('productTable');
 
   if (!products || !products.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No Products Found</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No Products Found</td></tr>`;
     return;
   }
 
   tbody.innerHTML = products.map((product, index) => {
-    // Support Serializer Aliases
     const pName = product.productName || product.name || 'No Name';
     const pImage = product.productImage || product.image || null;
     const pCategory = product.categoryName || (product.category && product.category.name) || '—';
     const pCategoryID = product.categoryID || (product.category && product.category.id) || '';
+    const isActive = product.is_active !== false; // default to true if undefined
     
     const imageUrl = formatImage(pImage);
+    const statusIcon = isActive 
+      ? '<i class="fas fa-check-circle status-active" title="Active"></i>' 
+      : '<i class="fas fa-times-circle status-inactive" title="Inactive"></i>';
+    const rowStyle = isActive ? '' : 'opacity:0.5;';
     
     return `
-      <tr>
+      <tr style="${rowStyle}">
         <td>${index + 1}</td>
         <td><div class="prod-thumb">${imageUrl ? `<img src="${imageUrl}" style="width:38px;height:38px;border-radius:8px;object-fit:cover">` : '📦'}</div></td>
         <td style="font-weight:600;color:white">${pName}</td>
@@ -397,6 +432,7 @@ function renderProducts(products) {
         <td>${pCategory}</td>
         <td style="color:#2ec4b6;font-weight:600">$${parseFloat(product.price).toFixed(2)}</td>
         <td><span class="stock-badge ${stockClass(product.stock)}">${product.stock} (${stockLabel(product.stock)})</span></td>
+        <td>${statusIcon}</td>
         <td>
           <button class="action-btn btn-edit" onclick="openEditModal(${product.id})"><i class="fas fa-edit"></i></button>
           <button class="action-btn btn-delete" onclick="deleteProduct(${product.id}, '${pName.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i></button>
@@ -412,10 +448,20 @@ function renderProducts(products) {
 function filterTable() {
   const keyword = document.getElementById('searchInput').value.toLowerCase();
   const category = document.getElementById('catFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  
   const filtered = allProducts.filter(p => {
     const pName = (p.productName || p.name || '').toLowerCase();
     const pCatID = p.categoryID || (p.category && p.category.id) || '';
-    return pName.includes(keyword) && (!category || pCatID == category);
+    const isActive = p.is_active !== false;
+    
+    const matchSearch = pName.includes(keyword);
+    const matchCategory = !category || pCatID == category;
+    const matchStatus = !status || 
+      (status === 'active' && isActive) || 
+      (status === 'inactive' && !isActive);
+    
+    return matchSearch && matchCategory && matchStatus;
   });
   renderProducts(filtered);
 }
@@ -431,9 +477,29 @@ function resetModal() {
   document.getElementById('fStock').value = '';
   document.getElementById('fImage').value = '';
   document.getElementById('fCategory').selectedIndex = 0;
+  document.getElementById('fIsActive').checked = true; // ✅ Default to active
+  updateToggleText();
   const errorBox = document.getElementById('modalError');
   errorBox.style.display = 'none'; errorBox.textContent = '';
 }
+
+// ✅ Toggle text updates
+function updateToggleText() {
+  const isChecked = document.getElementById('fIsActive').checked;
+  const textEl = document.getElementById('isActiveText');
+  if (isChecked) {
+    textEl.textContent = 'Active';
+    textEl.className = 'toggle-text active-text';
+  } else {
+    textEl.textContent = 'Inactive';
+    textEl.className = 'toggle-text inactive-text';
+  }
+}
+
+// ✅ Listen for toggle changes
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('fIsActive').addEventListener('change', updateToggleText);
+});
 
 function openAddModal() {
   resetModal();
@@ -453,6 +519,8 @@ function openEditModal(id) {
   document.getElementById('fPrice').value = product.price;
   document.getElementById('fStock').value = product.stock;
   document.getElementById('fCategory').value = product.categoryID || (product.category && product.category.id) || '';
+  document.getElementById('fIsActive').checked = product.is_active !== false; // ✅ Load current status
+  updateToggleText();
   
   new bootstrap.Modal(document.getElementById('productModal')).show();
 }
@@ -471,6 +539,7 @@ async function saveProduct() {
   const stock = document.getElementById('fStock').value || 0;
   const categoryID = document.getElementById('fCategory').value;
   const image = document.getElementById('fImage').files[0];
+  const isActive = document.getElementById('fIsActive').checked;
 
   if (!productName || !price) {
     errorBox.style.display = 'block';
@@ -480,27 +549,54 @@ async function saveProduct() {
 
   const formData = new FormData();
   
-  // ✅ MUST MATCH SERIALIZER ALIASES EXACTLY
   formData.append('productName', productName); 
   formData.append('price', price);
   formData.append('stock', stock);
   
+  // ✅ CRITICAL: Always send is_active explicitly
+  formData.append('is_active', isActive ? 'True' : 'False');
+  
   if (barcode) formData.append('barcode', barcode);
-  if (categoryID) formData.append('category_id', categoryID); // Matches write_only field
-  if (image) formData.append('productImage', image); // Matches alias field
+  if (categoryID) formData.append('category_id', categoryID);
+  if (image) formData.append('productImage', image);
+  // ✅ Always send description (even if empty) to avoid PUT issues
+  formData.append('description', '');
 
   const method = id ? 'PUT' : 'POST';
   const url = id ? `${API_BASE}/products/${id}/` : `${API_BASE}/products/`;
 
+  // ✅ DEBUG: Log what we're sending
+  console.log('=== SAVE PRODUCT DEBUG ===');
+  console.log('Method:', method);
+  console.log('URL:', url);
+  console.log('isActive:', isActive);
+  for (let pair of formData.entries()) {
+    console.log('FormData:', pair[0], '=', pair[1]);
+  }
+
   const response = await apiRequest(url, { method, body: formData });
 
-  if (response && response.ok) {
-    bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
-    window.location.reload(); 
-  } else if (response) {
-    const errorData = await response.json();
+  // ✅ DEBUG: Log the response
+  if (response) {
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    const responseText = await response.text();
+    console.log('Response body:', responseText);
+    
+    if (response.ok) {
+      bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+      window.location.reload(); 
+    } else {
+      errorBox.style.display = 'block';
+      try {
+        errorBox.textContent = JSON.stringify(JSON.parse(responseText), null, 2);
+      } catch(e) {
+        errorBox.textContent = responseText;
+      }
+    }
+  } else {
     errorBox.style.display = 'block';
-    errorBox.textContent = JSON.stringify(errorData);
+    errorBox.textContent = 'No response from server. Check your connection.';
   }
 }
 
@@ -520,8 +616,16 @@ async function deleteProduct(id, name) {
 /* =========================
    INIT
 ========================= */
-loadData();
+var now = new Date();
+document.getElementById("todayDate").textContent =
+  now.toLocaleDateString("km-KH", {
+    weekday: "long",
+    year:    "numeric",
+    month:   "long",
+    day:     "numeric"
+  });
 
+loadData();
 </script>
 </body>
 </html>
